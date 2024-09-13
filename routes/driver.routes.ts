@@ -7,6 +7,7 @@ const router = express.Router();
 router.post("/create", isAuth, driverController.createDriver);
 router.post("/login", driverController.loginDriver);
 router.get("/allActiveDrivers", driverController.getAllActiveDrivers);
+router.get("/allDrivers", driverController.getAllDrivers);
 
 
 export default router;
