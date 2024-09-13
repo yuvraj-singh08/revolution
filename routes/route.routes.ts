@@ -5,7 +5,7 @@ import * as routeController from '../controllers/route.controller';
 
 const router = express.Router();
 
-router.get('/', isAuth, routeController.getRoutes);
+router.get('/', routeController.getRoutes);
 router.post('/assign', isAuth, routeController.assignRoute);
 router.get('/assigned',  routeController.getAssignedRoutes);
 
