@@ -15,8 +15,8 @@ const Route = sequelize.define('routes', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('pending', 'completed'),
-        defaultValue: 'pending',
+        type: DataTypes.ENUM('PENDING', 'COMPLETED'),
+        defaultValue: 'PENDING',
     },
     completionTime: {
         type: DataTypes.DATE,

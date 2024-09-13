@@ -18,6 +18,7 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
         });
 
         const promises = csvData.map(async (data) => {
+           try {
             let routeId;
             const existingRoute = await Route.findOne({
                 where: {
@@ -72,15 +73,19 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                 } else {
                     savedStops.push(record);
                 }
+                console.log(record);
                 const newStop = await Stop.create(record);
                 return newStop;
             } else {
                 console.log('Stop already exists, skipping');
 
             }
+           } catch (error) {
+            console.log(error);
+           }
         })
         try {
-            const result = await Promise.allSettled(promises)
+            const result = await Promise.all(promises)
         } catch (error) {
             console.log(error);
         }

@@ -33,4 +33,5 @@ export type GetRouteProps = {
     date: string,
     status?: string,
     driverId?: string,
+    routeId?: string,
 }

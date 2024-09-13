@@ -5,7 +5,7 @@ import { stopStatus } from "../config/constants";
 
 export const getRoutes = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { date, status, driverId } = req.query;
+        const { date, status, driverId, routeId } = req.query;
         if (!date || typeof date !== "string") {
             res.status(400).json({ success: false, message: "Missing required field 'date' or invalid date format" });
             return;
@@ -21,8 +21,12 @@ export const getRoutes = async (req: Request, res: Response, next: NextFunction)
             res.status(400).json({ success: false, message: "Invalid driverId format" });
             return;
         }
+        if (routeId && typeof routeId !== "string") {
+            res.status(400).json({ success: false, message: "Invalid routeId format" });
+            return;
+        }
 
-        const routes = await getRouteService({ date, status, driverId });
+        const routes = await getRouteService({ date, status, driverId, routeId });
         res.status(200).json({ success: true, ...routes });
     } catch (error: any) {
         res.status(400).json({ success: false, message: error.message })

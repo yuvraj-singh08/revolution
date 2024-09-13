@@ -6,6 +6,7 @@ export const getRouteService = async ({
     date,
     status,
     driverId,
+    routeId,
 }: GetRouteProps) => {
     try {
         const whereClause: any = {
@@ -13,6 +14,9 @@ export const getRouteService = async ({
         }
         if (status) {
             whereClause.status = status
+        }
+        if(routeId){
+            whereClause.id = routeId
         }
 
         // Fetch all routes based on the provided query parameters (date, status, driverId)
