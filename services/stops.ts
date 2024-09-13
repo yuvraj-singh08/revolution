@@ -147,6 +147,14 @@ export const updateStopService = async (data: any) => {
     }
 }
 
+// export const addStopService = async (stopData: any) => {
+//     try {
+//         const newStop = 
+//     } catch (error) {
+        
+//     }
+// }
+
 // export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
 //     try {
 //         let savedStops: any = []

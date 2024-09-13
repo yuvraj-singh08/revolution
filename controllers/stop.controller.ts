@@ -39,7 +39,7 @@ export const updateBulkStop = async (req: AuthenticatedRequest, res: Response, n
     try {
         const { data } = req.body;
         const { role } = req.user;
-
+//add checkPermission here and below
         const updateStops = await updateBulkStopService(data);
         res.status(200).json({
             success: true,

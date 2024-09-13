@@ -57,10 +57,10 @@ const mailOptions = {
 transporter.sendMail(mailOptions, async (error: Error | null, info: { response: string }) => {
     if (error) {
         console.log('Error sending email:', error);
-        return res.send({ message: 'Registration successful, but failed to send email', error: true });
+        // return res.send({ message: 'Registration successful, but failed to send email', error: true });
     } else {
         console.log('Email sent:', info.response);
-        return res.send({ message: 'Registration successful and email sent', error: false });
+        // return res.send({ message: 'Registration successful and email sent', error: false });
     }
 });
 
