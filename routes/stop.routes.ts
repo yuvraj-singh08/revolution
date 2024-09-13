@@ -6,5 +6,6 @@ import * as stopController from '../controllers/stop.controller';
 const router = express.Router();
 
 router.post('/uploadCsv', isAuth, upload.single('file'), stopController.createCsvStop);
+router.post('/bulkUpdate', isAuth, stopController.updateBulkStop);
 
 export default router;

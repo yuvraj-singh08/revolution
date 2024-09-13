@@ -95,6 +95,34 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
     }
 }
 
+export const updateBulkStopService = async (data: any) => {
+    try {
+        if (!data || data.length === 0) {
+            console.log("No data provided for updates.");
+            return;
+        }
+
+        const promises = data.map((stop: { id: number;[key: string]: any }) => {
+            const { id, ...rest } = stop; // Destructure and exclude id
+            if (!id) {
+                return Promise.reject(new Error("Missing id for stop"));
+            }
+            return Stop.update(rest, { where: { id } });
+        });
+
+        const result = await Promise.allSettled(promises);
+
+        // Handle results
+        result.forEach((res, index) => {
+            if (res.status === "rejected") {
+                console.error(`Failed to update stop at index ${index}:`, res.reason);
+            }
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+
 // export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
 //     try {
 //         let savedStops: any = []
