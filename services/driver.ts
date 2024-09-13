@@ -8,14 +8,14 @@ export const getAllActiveDriversService = async () => {
     try {
         const activeDrivers = await ActiveRoutes.findAll({})
         return activeDrivers ? activeDrivers : null;
-} catch (error) { throw error; }
+    } catch (error) { throw error; }
 }
 
 export const getAllDriversService = async () => {
     try {
         const allDrivers = await Driver.findAll({})
         return allDrivers ? allDrivers : null;
-} catch (error) { throw error; }
+    } catch (error) { throw error; }
 }
 
 
@@ -77,6 +77,7 @@ export const loginDriverService = async ({ email, password }: LoginDriverProps) 
             id: user.get("id"),
             name: user.get("name"),
             email: user.get("email"),
+            role: "DRIVER"
         }
         const token = jwt.sign(userSessionData, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
         return { data: { ...userData }, token };

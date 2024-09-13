@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { getRouteService } from "../services/route";
+import { assignRouteService, getAssignedRoutesService, getRouteService } from "../services/route";
 import { AuthenticatedRequest } from "../middleware/auth";
-import { stopStatus } from "../config/constants";
+import { resources, roles, stopStatus } from "../config/constants";
+import { checkPermissionService } from "../services/role";
 
 export const getRoutes = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -33,10 +34,49 @@ export const getRoutes = async (req: Request, res: Response, next: NextFunction)
     }
 }
 
+export const assignRoute = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { routeId } = req.body;
+        let driverId;
+        const role = req.user.role;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions to assign a route'
+                });
+                return;
+            }
+        }
+        driverId = req.body.driverId;
+
+        const assignedRoute = await assignRouteService({ driverId, routeId });
+        res.status(200).json({ success: true, data: assignedRoute });
+
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        })
+    }
+}
+
 export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-
-    } catch (error) {
-
+        const { driverId } = req.query
+        if (driverId && typeof driverId !== "string") {
+            res.status(400).json({ success: false, message: "Missing required field 'driverId' or invalid driverId format" });
+            return;
+        }
+        const assignedRoutes = await getAssignedRoutesService(driverId);
+        res.status(200).json({ success: true, data: assignedRoutes });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        })
     }
 }

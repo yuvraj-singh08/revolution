@@ -1,6 +1,8 @@
+import AssignedRoute from "../models/AssignedRoutes.model";
+import Driver from "../models/Driver.model";
 import Route from "../models/Route.model"
 import Stop from "../models/Stop.model"
-import { GetRouteProps, StopStatusType } from "../utils/types";
+import { AssignRouteProps, GetRouteProps, StopStatusType } from "../utils/types";
 
 export const getRouteService = async ({
     date,
@@ -15,7 +17,7 @@ export const getRouteService = async ({
         if (status) {
             whereClause.status = status
         }
-        if(routeId){
+        if (routeId) {
             whereClause.id = routeId
         }
 
@@ -40,7 +42,7 @@ export const getRouteService = async ({
                 } else {
                     faultyStops.push({
                         ...(stop.get()),
-                        routeNo:routeData.routeId
+                        routeNo: routeData.routeId
                     });  // Collect faulty stops, but don't return anything
                     return false;  // Exclude from the filtered array
                 }
@@ -52,6 +54,56 @@ export const getRouteService = async ({
             };
         });
         return { data: routes, faultyStops };
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const assignRouteService = async ({ driverId, routeId }: AssignRouteProps) => {
+    try {
+        const assigneAlready = await AssignedRoute.findOne({
+            where: {
+                routeId
+            }
+        })
+        if (assigneAlready) {
+            if (assigneAlready.get('driverId') === driverId) {
+                throw new Error('Driver is already assigned to this route')
+            }
+            throw new Error('Route is assigned to other driver')
+        }
+        const assignedRoute = await AssignedRoute.create({
+            routeId,
+            driverId,
+        })
+        return assignedRoute;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getAssignedRoutesService = async (driverId: string | undefined) => {
+    try {
+        let whereClause: any = {}
+        if (driverId) {
+            whereClause = {
+                driverId
+            }
+        }
+        const assignedRoutes = await AssignedRoute.findAll({
+            where: whereClause,
+            include: [
+                {
+                    model: Route,
+                    as: 'assignedRoute',// Same as assigned in association
+                },
+                {
+                    model: Driver,
+                    as: 'assignedDriver',
+                }
+            ]
+        })
+        return assignedRoutes;
     } catch (error) {
         throw error;
     }

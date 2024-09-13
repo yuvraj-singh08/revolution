@@ -48,3 +48,8 @@ export type GetRouteProps = {
     driverId?: string,
     routeId?: string,
 }
+
+export type AssignRouteProps = {
+    routeId: string,
+    driverId: string,
+}

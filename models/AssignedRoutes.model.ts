@@ -1,10 +1,11 @@
 import { DataTypes, Sequelize } from 'sequelize';
 import { sequelize } from '.';
 
-const ActiveRoutes = sequelize.define('activeRoutes', {
+
+const AssignedRoute = sequelize.define('assigned_routes', {
     id: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV4, // Auto-generate UUID
         allowNull: false,
         primaryKey: true,
     },
@@ -14,25 +15,29 @@ const ActiveRoutes = sequelize.define('activeRoutes', {
         references: {
             model: 'routes',
             key: 'id',
-        },
+        }
     },
-    driverId:{
+    driverId: {
         type: DataTypes.UUID,
         allowNull: false,
-        references:{
+        references: {
             model: 'drivers',
             key: 'id',
         }
-    },
- }, {
-    tableName: 'activeRoutes',
+    }
+}, {
+    tableName: 'assigned_routes',    // Define table name explicitly
     indexes: [
         {
             unique: true,
-            fields: ['routeId']
+            fields: ['routeId', 'driverId']  // Unique index on the email field
+        },
+        {
+            unique: true,
+            fields: ['routeId']  // Unique index on the email field
         },
     ],
-    timestamps: true,
+    timestamps: true
 });
 
-export default ActiveRoutes;
+export default AssignedRoute;
