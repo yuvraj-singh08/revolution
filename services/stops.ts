@@ -1,3 +1,4 @@
+import { officeCoordinate } from "../config/constants";
 import Route from "../models/Route.model";
 import Stop from "../models/Stop.model";
 import { readCsv } from "../utils/readCsv"
@@ -16,68 +17,74 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                 .on('error', (error) => reject(error));
         });
 
-        for (const data of csvData) {
-            try {
-                let routeId;
-                const existingRoute = await Route.findOne({
-                    where: {
-                        routeId: data.ROUTE,
-                        uploadDate: date
-                    }
-                });
-
-                if (existingRoute) {
-                    routeId = existingRoute.get("id");
-                } else {
-                    const newRoute = await Route.create({
-                        routeId: data.ROUTE,
-                        uploadDate: date
-                    });
-                    routeId = newRoute.get("id");
+        const promises = csvData.map(async (data) => {
+            let routeId;
+            const existingRoute = await Route.findOne({
+                where: {
+                    routeId: data.ROUTE,
+                    uploadDate: date
                 }
+            });
 
-                const record = {
-                    stopId: data.ROUTESTOP || null,
-                    latitude: data.SGPSLAT || null,
-                    longitude: data.SGPSLON || null,
-                    routeId: routeId || null,
-                    serveAddress: data.SERVADDR || null,
-                    accountNumber: data['ACCT#'] || null,
-                    uploadDate: date,
-                    city: data['W-CITY'] || null,
-                    serveName: data.SERVNAME || null,
-                    serveQty: data.SERVQTY || null,
-                    serveType: data.SERVTYPE || null,
-                    phone: data.SERVPHONE || null,
-                    containerId: data.CONTAINER1 || null,
-                    oneTimePickup: !!data.WLIN3,
-                    message: data['W-MSG1'] || null,
-                };
+            if (existingRoute) {
+                routeId = existingRoute.get("id");
+            } else {
+                const newRoute = await Route.create({
+                    routeId: data.ROUTE,
+                    uploadDate: date
+                });
+                routeId = newRoute.get("id");
+            }
 
-                const existingRecord = await Stop.findOne({ where: {
+            const record = {
+                stopId: data.ROUTESTOP || null,
+                latitude: data.SGPSLAT || null,
+                longitude: data.SGPSLON || null,
+                routeId: routeId || null,
+                serveAddress: data.SERVADDR || null,
+                accountNumber: data['ACCT#'] || null,
+                uploadDate: date,
+                city: data['W-CITY'] || null,
+                serveName: data.SERVNAME || null,
+                serveQty: data.SERVQTY || null,
+                serveType: data.SERVTYPE || null,
+                phone: data.SERVPHONE || null,
+                containerId: data.CONTAINER1 || null,
+                oneTimePickup: !!data.WLIN3,
+                message: data['W-MSG1'] || null,
+                faulty: false
+            };
+
+            const existingRecord = await Stop.findOne({
+                where: {
                     latitude: record.latitude,
                     longitude: record.longitude,
                     routeId: record.routeId,
                     serveAddress: record.serveAddress,
                     uploadDate: record.uploadDate,
-                } });
-
-                if (!existingRecord) {
-                    const newStop = await Stop.create(record);
-                    if (record.latitude === null || record.longitude === null) {
-                        faultyStops.push(newStop);
-                    } else {
-                        savedStops.push(newStop);
-                    }
-                } else {
-                    console.log('Stop already exists, skipping');
                 }
-            } catch (err) {
-                console.log(err);
-                // Handle individual record processing errors here
+            });
+
+            if (!existingRecord) {
+                if (record.latitude === null || record.longitude === null) {
+                    record.faulty = true
+                    faultyStops.push(record);
+                } else {
+                    savedStops.push(record);
+                }
+                const newStop = await Stop.create(record);
+                return newStop;
+            } else {
+                console.log('Stop already exists, skipping');
+
             }
+        })
+        try {
+            const result = await Promise.allSettled(promises)
+        } catch (error) {
+            console.log(error);
         }
-        return { savedStops, faultyStops };
+        return { data:savedStops, faultyStops };
         // fileStream.pipe(csvParser())
         //     .on('data', async (data) => {
         //         try {

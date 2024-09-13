@@ -21,9 +21,9 @@ export const getRoutes = async (req: Request, res: Response, next: NextFunction)
             res.status(400).json({ success: false, message: "Invalid driverId format" });
             return;
         }
-        
+
         const routes = await getRouteService({ date, status, driverId });
-        res.status(200).json({ success: true, data: routes });
+        res.status(200).json({ success: true, ...routes });
     } catch (error: any) {
         res.status(400).json({ success: false, message: error.message })
     }

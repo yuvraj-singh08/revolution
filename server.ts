@@ -41,7 +41,7 @@ import './models/associations/index';
 const PORT = process.env.PORT
 app.listen(PORT, async () => {
     try {
-        await sequelize.sync({ alter: false });
+        await sequelize.sync({ alter: true });
         return console.log(`Server is running on port: ${PORT}`);
     } catch (err) {
         console.log(err)

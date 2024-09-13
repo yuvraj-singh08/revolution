@@ -26,7 +26,7 @@ export const createCsvStop = async (req: AuthenticatedRequest, res: Response, ne
         const newStops = await createCsvStopService(fileBuffer, date)
         res.status(200).json({
             success: true,
-            data: newStops,
+            ...newStops,
             message: 'CSV stop created successfully'
         })
     } catch (error: any) {

@@ -109,6 +109,10 @@ const Stop = sequelize.define('Stop', {
     message: {
         type: DataTypes.TEXT,
         allowNull: true,
+    },
+    faulty: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,  // Default value for faulty is false
     }
 }, {
     tableName: 'stops',   // Name of the table

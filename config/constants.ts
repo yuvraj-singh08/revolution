@@ -16,3 +16,8 @@ export const stopStatus = {
     exception: 'EXCEPTION',
     exceptionHandled: 'EXCEPTION_HANDLED'
 }
+
+export const officeCoordinate = {
+    latitude: process.env.OFFICE_LAT || 0,
+    longitude: process.env.OFFICE_LNG || 0
+}
