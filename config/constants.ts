@@ -1,6 +1,7 @@
 export const resources = {
     DRIVER: 'driver',
-    CSV: 'csv'
+    CSV: 'csv',
+    ROUTE: 'route',
 }
 
 export const actions = {
@@ -20,4 +21,9 @@ export const stopStatus = {
 export const officeCoordinate = {
     latitude: process.env.OFFICE_LAT || 0,
     longitude: process.env.OFFICE_LNG || 0
+}
+
+export const roles = {
+    ADMIN: 'admin',
+    DRIVER: 'driver'
 }

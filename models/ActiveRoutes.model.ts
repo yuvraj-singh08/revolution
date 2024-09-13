@@ -9,15 +9,15 @@ const ActiveRoutes = sequelize.define('activeRoutes', {
         primaryKey: true,
     },
     routeId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
             model: 'routes',
             key: 'id',
         },
     },
-    DriverId:{
-        type: DataTypes.INTEGER,
+    driverId:{
+        type: DataTypes.UUID,
         allowNull: false,
         references:{
             model: 'drivers',

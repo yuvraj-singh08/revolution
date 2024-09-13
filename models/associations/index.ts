@@ -34,9 +34,13 @@ Driver.hasMany(Stop, { foreignKey: 'completedBy', as: 'driverStops' }); // A Dri
 Stop.belongsTo(Driver, { foreignKey: 'completedBy', as: 'driver' }); // A Stop is completed by a Driver
 
 //Active Routes Association
-Driver.hasOne(ActiveRoutes, {foreignKey:'driverId', as: "driver"})
-Route.hasOne(ActiveRoutes, {foreignKey:'routeId', as: "route"})
-ActiveRoutes.belongsTo(Driver, {foreignKey:'driverId', onDelete: 'CASCADE', as: "driver"})
-ActiveRoutes.belongsTo(Route, {foreignKey:'routeId', onDelete: 'CASCADE', as: "route"})
+Driver.hasOne(ActiveRoutes, { foreignKey: 'driverId', as: "driver" })
+Route.hasOne(ActiveRoutes, { foreignKey: 'routeId', as: "route" })
+ActiveRoutes.belongsTo(Driver, { foreignKey: 'driverId', onDelete: 'CASCADE', as: "driver" })
+ActiveRoutes.belongsTo(Route, { foreignKey: 'routeId', onDelete: 'CASCADE', as: "route" })
 
 // Assigned Routes Association
+AssignedRoute.belongsTo(Driver, { foreignKey: 'driverId', as: "assignedDriver" })
+AssignedRoute.belongsTo(Route, { foreignKey: 'routeId', as: "assignedRoute" })
+Driver.hasMany(AssignedRoute, { foreignKey: 'driverId', as: "assignedRoutes" })
+Route.hasOne(AssignedRoute, { foreignKey: 'routeId', as: "assignedDriver" })
