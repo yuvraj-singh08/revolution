@@ -24,7 +24,11 @@ export const createCsvStop = async (req: AuthenticatedRequest, res: Response, ne
         const fileBuffer = req.file.buffer;
         const date = typeof req.query.date === 'string' ? req.query.date : moment().format('YYYY-MM-DD');
         const newStops = await createCsvStopService(fileBuffer, date)
-        res.status(200).json(newStops)
+        res.status(200).json({
+            success: true,
+            data: newStops,
+            message: 'CSV stop created successfully'
+        })
     } catch (error: any) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to create CSV stop', error: error.message });

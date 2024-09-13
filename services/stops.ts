@@ -3,9 +3,10 @@ import Stop from "../models/Stop.model";
 import { readCsv } from "../utils/readCsv"
 import csvParser from 'csv-parser';
 
-export const createCsvStopService = async (fileBuffer: any, date: string) => {
+export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
     try {
-        let savedStops = []
+        let savedStops: any = []
+        let faultyStops: any = []
         const fileStream = readCsv(fileBuffer);
         fileStream.pipe(csvParser())
             .on('data', async (data) => {
@@ -45,9 +46,19 @@ export const createCsvStopService = async (fileBuffer: any, date: string) => {
                         oneTimePickup: data.WLIN3 ? true : false,
                         message: data['W-MSG1'] || null,
                     };
+                    const existingRecord = await Stop.findOne({
+                        where: record
+                    })
+                    if (existingRecord) {
+                        console.log('Stop already exists, skipping')
+                        return;
+                    }
 
                     const newStop = await Stop.create(record);
-                    savedStops.push(newStop);
+                    if (record.latitude === null || record.longitude === null)
+                        faultyStops.push(newStop);
+                    else
+                        savedStops.push(newStop);
 
                 } catch (err) {
                     console.log(err)
@@ -81,6 +92,7 @@ export const createCsvStopService = async (fileBuffer: any, date: string) => {
             .on('error', (error) => {
                 throw new Error('Error processing file stream')
             });
+        return { faultyStops, savedStops };
     } catch (error) {
         throw error;
     }

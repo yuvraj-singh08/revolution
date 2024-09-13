@@ -51,7 +51,7 @@ const Stop = sequelize.define('Stop', {
         allowNull: true,
     },
     uploadDate: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false,
     },
     serveAddress: {
