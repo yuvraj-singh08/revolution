@@ -38,7 +38,10 @@ export const getRouteService = async ({
                 if (!stop.faulty) {
                     return true;  // Include in the filtered array
                 } else {
-                    faultyStops.push(stop);  // Collect faulty stops, but don't return anything
+                    faultyStops.push({
+                        ...(stop.get()),
+                        routeNo:routeData.routeId
+                    });  // Collect faulty stops, but don't return anything
                     return false;  // Exclude from the filtered array
                 }
             });
