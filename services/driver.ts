@@ -8,14 +8,14 @@ export const getAllActiveDriversService = async () => {
     try {
         const activeDrivers = await ActiveRoutes.findAll({})
         return activeDrivers ? activeDrivers : null;
-} catch (error) { throw error; }
+    } catch (error) { throw error; }
 }
 
 export const getAllDriversService = async () => {
     try {
         const allDrivers = await Driver.findAll({})
         return allDrivers ? allDrivers : null;
-} catch (error) { throw error; }
+    } catch (error) { throw error; }
 }
 
 

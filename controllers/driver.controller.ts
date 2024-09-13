@@ -7,11 +7,11 @@ import { actions, resources } from "../config/constants";
 import { createTransport } from 'nodemailer';
 dotenv.config();
 export const getAllActiveDrivers  = async (req: AuthenticatedRequest, res: Response) => {
-    res.send(await getAllActiveDriversService())
+    res.json(await getAllActiveDriversService())
 }
 
 export const getAllDrivers  = async (req: AuthenticatedRequest, res: Response) => {
-    res.send(await getAllDriversService())
+    res.json(await getAllDriversService())
 }
 
 export const createDriver = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

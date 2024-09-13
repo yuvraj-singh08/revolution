@@ -11,10 +11,18 @@ const ActiveRoutes = sequelize.define('activeRoutes', {
     routeId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'routes',
+            key: 'id',
+        },
     },
     DriverId:{
         type: DataTypes.INTEGER,
         allowNull: false,
+        references:{
+            model: 'drivers',
+            key: 'id',
+        }
     },
  }, {
     tableName: 'activeRoutes',
