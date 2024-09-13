@@ -15,6 +15,7 @@ export interface UpdateDriverProps {
     mobileNo?: string;
     email?: string;
     password?:string;
+    active?:Boolean;
 }
 
 export interface CreateAdminProps {
