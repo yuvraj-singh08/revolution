@@ -22,6 +22,11 @@ export interface LoginAdminProps {
     password: string,
 }
 
+export interface LoginDriverProps {
+    email: string,
+    password: string,
+}
+
 export type StopStatusType = "PENDING" | "COMPLETED" | "EXCEPTION_HANDLED" | "EXCEPTION"
 
 export type GetRouteProps = {
