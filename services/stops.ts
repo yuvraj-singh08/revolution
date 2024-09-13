@@ -123,6 +123,30 @@ export const updateBulkStopService = async (data: any) => {
     }
 }
 
+export const updateStopService = async (data: any) => {
+    try {
+        if (!data) {
+            throw new Error("No data provided");
+        }
+        const id = data.id;
+        delete data.id;
+        const [updatedStop] = await Stop.update({
+            ...data
+        },
+            {
+                where: {
+                    id
+                }
+            })
+        if (updatedStop === 0) {
+            throw new Error("Failed to update")
+        }
+        return updatedStop;
+    } catch (error) {
+        throw error;
+    }
+}
+
 // export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
 //     try {
 //         let savedStops: any = []

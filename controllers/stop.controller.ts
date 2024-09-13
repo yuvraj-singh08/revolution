@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { checkPermissionService } from "../services/role";
 import { actions, resources } from "../config/constants";
-import { createCsvStopService, updateBulkStopService } from "../services/stops";
+import { createCsvStopService, updateBulkStopService, updateStopService } from "../services/stops";
 import moment from "moment";
 
 export const createCsvStop = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -47,6 +47,27 @@ export const updateBulkStop = async (req: AuthenticatedRequest, res: Response, n
             message: 'Bulk stop updated successfully'
         });
     } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            message: 'Failed to update bulk stop',
+            error: error.message
+        })
+    }
+}
+
+export const updateStop = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { data } = req.body;
+        const { role } = req.user;
+
+        const updateStops = await updateStopService(data);
+        res.status(200).json({
+            success: true,
+            data: updateStops,
+            message: 'Stop updated successfully'
+        });
+    } catch (error: any) {
+        console.log(error);
         res.status(400).json({
             success: false,
             message: 'Failed to update bulk stop',
