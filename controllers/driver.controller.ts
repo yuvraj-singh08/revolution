@@ -100,7 +100,7 @@ export const editDriver = async (req: AuthenticatedRequest, res: Response, next:
 
         const { licenseNo, name, ssnNo, dob, driverType, status, mobileNo, email, driverId } = req.body;
 
-        if (!driverId || !email || !name) {
+        if (!driverId) {
             return res.status(400).json({ success: false, error: "Missing required fields" });
         }
         const updatedDriver = await updateDriverService(driverId, {
