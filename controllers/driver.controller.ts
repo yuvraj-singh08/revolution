@@ -38,13 +38,13 @@ export const createDriver = async (req: AuthenticatedRequest, res: Response, nex
         }
         const createdDriver = await createDriverService({ email, password, name });
  // Send registration email
-//  const transporter = createTransport({
-//     service: 'gmail',
-//     auth: {
-//         user: process.env.MAILER_ID,
-//         pass: process.env.MAILER_KEY
-//     }
-// });
+ const transporter = createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.MAILER_ID,
+        pass: process.env.MAILER_KEY
+    }
+});
 
 const mailOptions = {
     from: process.env.MAILER_ID,
