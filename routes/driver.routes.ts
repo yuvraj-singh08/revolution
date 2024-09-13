@@ -6,6 +6,9 @@ const router = express.Router();
 
 router.post("/create", isAuth, driverController.createDriver);
 router.post("/login", driverController.loginDriver);
+router.post("/update", isAuth, driverController.editDriver);
+router.post("/delete", isAuth, driverController.deleteDriver);
+
 router.get("/allActiveDrivers", driverController.getAllActiveDrivers);
 router.get("/allDrivers", driverController.getAllDrivers);
 

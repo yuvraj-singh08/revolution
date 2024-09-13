@@ -23,6 +23,7 @@ RoleManager.belongsTo(Admin, { foreignKey: 'adminId', onDelete: 'CASCADE', as: '
 RoleManager.belongsTo(Roles, { foreignKey: 'roleId', onDelete: 'CASCADE', as: "role" })
 Roles.hasMany(RoleManager, { foreignKey: 'roleId', as: "assignedTo" })
 
+
 //Route and Stop Association
 Route.hasMany(Stop, { foreignKey: 'routeId', as: 'stops' });
 Stop.belongsTo(Route, { foreignKey: 'routeId', as: 'route' });

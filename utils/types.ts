@@ -4,6 +4,19 @@ export interface CreateDriverProps {
     name: string,
 }
 
+export interface UpdateDriverProps {
+    id?:string;
+    licenseNo?: string;
+    name?: string;
+    ssnNo?: string;
+    dob?: Date;
+    driverType?: string;
+    status?: string;
+    mobileNo?: string;
+    email?: string;
+    password?:string;
+}
+
 export interface CreateAdminProps {
     email: string,
     password: string,

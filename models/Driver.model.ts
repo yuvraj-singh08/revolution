@@ -37,7 +37,12 @@ const Driver = sequelize.define('Driver', {
     },
     lastLocation: {
         type: DataTypes.JSON,  // Store last location as JSON
+    },
+    active:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
+
 }, {
     tableName: 'drivers',    // Define table name explicitly
     indexes: [

@@ -1,6 +1,13 @@
 import * as dotenv from 'dotenv';
 import { NextFunction, Request, Response } from "express";
-import { createDriverService, loginDriverService, getAllActiveDriversService, getAllDriversService } from "../services/driver";
+import {
+    createDriverService,
+    loginDriverService,
+    updateDriverService,
+    deleteDriverService,
+    getAllActiveDriversService,
+    getAllDriversService
+} from "../services/driver";
 import { checkPermissionService } from "../services/role";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { actions, resources } from "../config/constants";
@@ -78,3 +85,59 @@ export const loginDriver = async (req: Request, res: Response, next: NextFunctio
         res.status(500).json({ success: false, error: error.message, message: "Failed to Login" });
     }
 }
+
+export const editDriver = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { role } = req.user;
+        const permission = await checkPermissionService(role.id, resources.DRIVER, actions.UPDATE);
+
+        if (!permission) {
+            return res.status(403).json({
+                success: false,
+                message: 'Insufficient permissions to edit a driver'
+            });
+        }
+
+        const { licenseNo, name, ssnNo, dob, driverType, status, mobileNo, email, driverId } = req.body;
+
+        if (!driverId || !email || !name) {
+            return res.status(400).json({ success: false, error: "Missing required fields" });
+        }
+        const updatedDriver = await updateDriverService(driverId, {
+            licenseNo,
+            name,
+            ssnNo,
+            dob,
+            driverType,
+            status,
+            mobileNo,
+            email,
+        });
+
+        if (!updatedDriver) {
+            return res.status(404).json({ success: false, message: "Driver not found or update failed" });
+        }
+        return res.status(200).json({ success: true, error: false, data: updatedDriver });
+
+    } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({ success: false, error: error.message, message: "Failed to edit driver" });
+    }
+};
+
+export const deleteDriver = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+    try {
+        const { id } = req.body;
+        if (typeof id !== 'string' || !id) {
+            return res.status(400).json({ message: 'Invalid driver ID', success: false, error: true });
+        }
+        const deletedCount = await deleteDriverService(id);
+        if (deletedCount === 0) {
+            return res.status(404).json({ message: 'Driver not found', success: false, error: true });
+        }
+        return res.send({ message: 'Driver has been deleted', success: true, error: false });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({ message: `Error: ${error.message}`, error: true, success: false });
+    }
+};
