@@ -1,10 +1,10 @@
-export interface CreateDriverProps{
+export interface CreateDriverProps {
     email: string,
     password: string,
     name: string,
 }
 
-export interface CreateAdminProps{
+export interface CreateAdminProps {
     email: string,
     password: string,
     name: string,
@@ -17,7 +17,15 @@ export type UserActionType = {
 export type ResourceType = "driver" | "csv"
 
 
-export interface LoginAdminProps{
+export interface LoginAdminProps {
     email: string,
     password: string,
+}
+
+export type StopStatusType = "PENDING" | "COMPLETED" | "EXCEPTION_HANDLED" | "EXCEPTION"
+
+export type GetRouteProps = {
+    date: string,
+    status?: string,
+    driverId?: string,
 }
