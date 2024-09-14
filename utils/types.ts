@@ -16,6 +16,7 @@ export interface UpdateDriverProps {
     email?: string;
     password?:string;
     active?:Boolean;
+    truckNo?:string;
 }
 
 export interface CreateAdminProps {
