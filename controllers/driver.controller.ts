@@ -138,7 +138,7 @@ export const editDriver = async (req: AuthenticatedRequest, res: Response, next:
                 });
                 return;
             }
-            driverId = req.body.id;
+            driverId = req.body.driverId;
         }
 
 
