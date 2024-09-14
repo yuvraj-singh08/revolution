@@ -22,7 +22,7 @@ export const getRouteService = async ({
         }
 
         // Fetch all routes based on the provided query parameters (date, status, driverId)
-        const allRoutes = await Route.findAll({ 
+        const allRoutes = await Route.findAll({
             where: whereClause,
             order: [
                 ['routeId', 'ASC'],
@@ -36,15 +36,18 @@ export const getRouteService = async ({
         })
         let faultyStops: any = [];
         const routes = allRoutes.map((routeData: any) => {
-            const filteredStops = routeData.get("stops").filter((stop: any) => {
+            let filteredStops: any = [];
+            routeData.get("stops").forEach((stop: any) => {
                 if (!stop.faulty) {
-                    return true;  // Include in the filtered array
+                    filteredStops.push({
+                        ...(stop.get()),
+                        routeNo: routeData.routeId
+                    });  // Collect valid stops, and return them
                 } else {
                     faultyStops.push({
                         ...(stop.get()),
                         routeNo: routeData.routeId
                     });  // Collect faulty stops, but don't return anything
-                    return false;  // Exclude from the filtered array
                 }
             });
 
