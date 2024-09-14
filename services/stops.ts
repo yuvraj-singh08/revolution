@@ -19,26 +19,45 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
 
         let errorCount = 0
         let stopsRepeated = 0
+        let createdRouteId: Map<string, string> = new Map(); // Map to store ROUTE as key and newRoute id as value
+
+        console.log("Reading done");
+        const routePromises = csvData.map(async (data) => {
+            try {
+                if (createdRouteId.has(data.ROUTE)) {
+                    return; // Skip if the route is already processed
+                }
+        
+                // const existingRoute = await Route.findOne({
+                //     where: {
+                //         routeId: data.ROUTE,
+                //         uploadDate: date
+                //     }
+                // });
+        
+                // if (!existingRoute) {
+                const newRoute = await Route.create({
+                    routeId: data.ROUTE,
+                    uploadDate: date,
+                });
+        
+                // Store ROUTE and corresponding db id in the hash map
+                const newRouteData = newRoute.get() as unknown as any
+                
+                createdRouteId.set(data.ROUTE, newRouteData.id);
+                return newRoute;
+                // }
+            } catch (error) {
+                console.log(error);
+            }
+        });
+        
+        const newRoutes = await Promise.all(routePromises);
+        console.log("Routes created");
 
         const promises = csvData.map( async (data) => {
             try {
-                let routeId;
-                const existingRoute = await Route.findOne({
-                    where: {
-                        routeId: data.ROUTE,
-                        uploadDate: date
-                    }
-                });
-
-                if (existingRoute) {
-                    routeId = existingRoute.get("id");
-                } else {
-                    const newRoute = await Route.create({
-                        routeId: data.ROUTE,
-                        uploadDate: date
-                    });
-                    routeId = newRoute.get("id");
-                }
+                const  routeId = createdRouteId.get(data.ROUTE)
 
                 const record = {
                     stopId: data.ROUTESTOP || null,
@@ -59,17 +78,17 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                     faulty: false,
                 };
 
-                const existingRecord = await Stop.findOne({
-                    where: {
-                        latitude: record.latitude,
-                        longitude: record.longitude,
-                        routeId: record.routeId,
-                        serveAddress: record.serveAddress,
-                        uploadDate: record.uploadDate,
-                    }
-                });
+                // const existingRecord = await Stop.findOne({
+                //     where: {
+                //         latitude: record.latitude,
+                //         longitude: record.longitude,
+                //         routeId: record.routeId,
+                //         serveAddress: record.serveAddress,
+                //         uploadDate: record.uploadDate,
+                //     }
+                // });
 
-                if (!existingRecord) {
+                // if (!existingRecord) {
                     if (record.latitude === null || record.longitude === null) {
                         record.faulty = true
                         faultyStops.push(record);
@@ -77,10 +96,10 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                         savedStops.push(record);
                     }
                     const newStop = await Stop.create(record);
-                } else {
-                    stopsRepeated++;
-                    console.log('Stop already exists, skipping');
-                }
+                // } else {
+                //     stopsRepeated++;
+                //     console.log('Stop already exists, skipping');
+                // }
             } catch (err) {
                 console.log(err);
                 errorCount++;
