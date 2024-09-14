@@ -20,7 +20,7 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
         let errorCount = 0
         let stopsRepeated = 0
 
-        for (const data of csvData) {
+        const promises = csvData.map( async (data) => {
             try {
                 let routeId;
                 const existingRoute = await Route.findOne({
@@ -86,7 +86,9 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                 errorCount++;
                 // Handle individual record processing errors here
             }
-        }
+        })
+
+        const result = await Promise.allSettled(promises)
 
         return { stopsRepeated, errorCount, data: savedStops, faultyStops };
 
@@ -94,6 +96,97 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
         throw error;
     }
 }
+
+// export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
+//     try {
+//         let savedStops: any = []
+//         let faultyStops: any = []
+//         const fileStream = readCsv(fileBuffer);
+//         const csvData = await new Promise<any[]>((resolve, reject) => {
+//             const rows: any[] = [];
+//             fileStream.pipe(csvParser())
+//                 .on('data', (data) => rows.push(data))
+//                 .on('end', () => resolve(rows))
+//                 .on('error', (error) => reject(error));
+//         });
+
+//         let errorCount = 0
+//         let stopsRepeated = 0
+
+//         for (const data of csvData) {
+//             try {
+//                 let routeId;
+//                 const existingRoute = await Route.findOne({
+//                     where: {
+//                         routeId: data.ROUTE,
+//                         uploadDate: date
+//                     }
+//                 });
+
+//                 if (existingRoute) {
+//                     routeId = existingRoute.get("id");
+//                 } else {
+//                     const newRoute = await Route.create({
+//                         routeId: data.ROUTE,
+//                         uploadDate: date
+//                     });
+//                     routeId = newRoute.get("id");
+//                 }
+
+//                 const record = {
+//                     stopId: data.ROUTESTOP || null,
+//                     latitude: data.SGPSLAT || null,
+//                     longitude: data.SGPSLON || null,
+//                     routeId: routeId || null,
+//                     serveAddress: data.SERVADDR || null,
+//                     accountNumber: data['ACCT#'] || null,
+//                     uploadDate: date,
+//                     city: data['W-CITY'] || null,
+//                     serveName: data.SERVNAME || null,
+//                     serveQty: data.SERVQTY || null,
+//                     serveType: data.SERVTYPE || null,
+//                     phone: data.SERVPHONE || null,
+//                     containerId: data.CONTAINER1 || null,
+//                     oneTimePickup: !!data.WLIN3,
+//                     message: data['W-MSG1'] || null,
+//                     faulty: false,
+//                 };
+
+//                 const existingRecord = await Stop.findOne({
+//                     where: {
+//                         latitude: record.latitude,
+//                         longitude: record.longitude,
+//                         routeId: record.routeId,
+//                         serveAddress: record.serveAddress,
+//                         uploadDate: record.uploadDate,
+//                     }
+//                 });
+
+//                 if (!existingRecord) {
+//                     if (record.latitude === null || record.longitude === null) {
+//                         record.faulty = true
+//                         faultyStops.push(record);
+//                     } else {
+//                         savedStops.push(record);
+//                     }
+//                     const newStop = await Stop.create(record);
+//                 } else {
+//                     stopsRepeated++;
+//                     console.log('Stop already exists, skipping');
+//                 }
+//             } catch (err) {
+//                 console.log(err);
+//                 errorCount++;
+//                 // Handle individual record processing errors here
+//             }
+//         }
+
+//         return { stopsRepeated, errorCount, data: savedStops, faultyStops };
+
+//     } catch (error) {
+//         throw error;
+//     }
+// }
 
 export const updateBulkStopService = async (data: any) => {
     try {
