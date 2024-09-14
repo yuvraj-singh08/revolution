@@ -121,16 +121,25 @@ export const loginDriver = async (req: Request, res: Response, next: NextFunctio
 export const editDriver = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { role } = req.user;
-        const permission = await checkPermissionService(role.id, resources.DRIVER, actions.UPDATE);
+        let driverId;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            const permission = await checkPermissionService(role.id, resources.DRIVER, actions.UPDATE);
 
-        if (!permission) {
-            return res.status(403).json({
-                success: false,
-                message: 'Insufficient permissions to edit a driver'
-            });
+            if (!permission) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions to edit a driver'
+                });
+                return;
+            }
+            driverId = req.body.id;
         }
 
-        const { licenseNo, name, ssnNo, dob, driverType, status, mobileNo, email, driverId, active } = req.body;
+
+        const { licenseNo, name, ssnNo, dob, driverType, status, mobileNo, email, active } = req.body;
 
         if (!driverId) {
             return res.status(400).json({ success: false, error: "Missing required fields" });
@@ -154,7 +163,8 @@ export const editDriver = async (req: AuthenticatedRequest, res: Response, next:
 
     } catch (error: any) {
         console.error(error);
-        return res.status(500).json({ success: false, error: error.message, message: "Failed to edit driver" });
+        // return res.status(500).json({ success: false, error: error.message, message: "Failed to edit driver" });
+        next(error);
     }
 };
 
