@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { sequelize } from './models';
 require('dotenv').config(); // For environment variables
@@ -36,7 +36,18 @@ app.use('/api/admin', adminRouter);
 app.use('/api/stop', stopRouter);
 app.use('/api/route', routeRouter);
 
+app.use((err: any, req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
+
+    res.status(statusCode).json({
+        success: false,
+        message: message,
+    });
+});
+
 import './models/associations/index';
+import { AuthenticatedRequest } from './middleware/auth';
 
 const PORT = process.env.PORT
 app.listen(PORT, async () => {

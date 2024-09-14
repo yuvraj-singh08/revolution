@@ -22,7 +22,7 @@ export const getRouteService = async ({
         }
 
         // Fetch all routes based on the provided query parameters (date, status, driverId)
-        const allRoutes = await Route.findAll({
+        const allRoutes = await Route.findAll({ 
             where: whereClause,
             order: [
                 ['routeId', 'ASC'],

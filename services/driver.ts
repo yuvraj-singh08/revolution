@@ -3,6 +3,8 @@ import Driver from "../models/Driver.model";
 import ActiveRoutes from "../models/ActiveRoutes.model";
 import { CreateDriverProps, LoginDriverProps, UpdateDriverProps } from "../utils/types";
 import jwt from 'jsonwebtoken';
+import HttpError from '../utils/httpError';
+import { roles } from '../config/constants';
 
 export const getAllActiveDriversService = async () => {
     try {
@@ -77,7 +79,7 @@ export const loginDriverService = async ({ email, password }: LoginDriverProps) 
             id: user.get("id"),
             name: user.get("name"),
             email: user.get("email"),
-            role: "DRIVER"
+            role: roles.DRIVER
         }
         const token = jwt.sign(userSessionData, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
         return { data: { ...userData }, token };
@@ -91,7 +93,19 @@ export const deleteDriverService = async (driverId: string): Promise<number> => 
         const deletedCount = await Driver.destroy({ where: { id: driverId } });
         return deletedCount;
     } catch (error) {
-          console.error('Error deleting driver:', error);
+        console.error('Error deleting driver:', error);
         throw new Error(`Failed to delete driver: ${error}`);
     }
 };
+
+export const getDriverDetailService = async (driverId: string): Promise<any> => {
+    try {
+        const driver = await Driver.findByPk(driverId);
+        if (!driver) {
+            throw new HttpError("Driver not found", 400);
+        }
+        return driver.get();
+    } catch (error) {
+        throw error;
+    }
+}

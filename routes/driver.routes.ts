@@ -11,6 +11,7 @@ router.post("/delete", isAuth, driverController.deleteDriver);
 
 router.get("/allActiveDrivers", driverController.getAllActiveDrivers);
 router.get("/allDrivers", driverController.getAllDrivers);
+router.get("/details", isAuth, driverController.getDriverDetails);
 
 
 export default router;
