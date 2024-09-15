@@ -1,10 +1,11 @@
 import bcrypt from 'bcryptjs';
 import Driver from "../models/Driver.model";
 import ActiveRoutes from "../models/ActiveRoutes.model";
-import { CreateDriverProps, LoginDriverProps, UpdateDriverProps } from "../utils/types";
+import { CreateDriverProps, LoginDriverProps, UpdateDriverProps, UpdateDriverStatusProps } from "../utils/types";
 import jwt from 'jsonwebtoken';
 import HttpError from '../utils/httpError';
 import { roles } from '../config/constants';
+import { where } from 'sequelize';
 const { Op } = require('sequelize');
 
 export const getAllActiveDriversService = async () => {
@@ -20,6 +21,18 @@ export const getAllDriversService = async () => {
         return allDrivers ? allDrivers : null;
     } catch (error) { throw error; }
 }
+
+export const updateDriverStatusService = async (driverId: string, status: UpdateDriverStatusProps) => {
+    try {
+        await Driver.update({status}, { where: { id:driverId } });
+        const driver = await Driver.findByPk(driverId);
+        return driver
+    } catch (error) {
+        throw error;
+    }
+}
+
+
 
 export const getAllDriversReportService = async (startDate: string, endDate: string): Promise<any | null> => {
     try {

@@ -7,7 +7,8 @@ import {
     deleteDriverService,
     getAllActiveDriversService,
     getAllDriversService,
-    getDriverDetailService
+    getDriverDetailService,
+    updateDriverStatusService,
 } from "../services/driver";
 import { checkPermissionService } from "../services/role";
 import { AuthenticatedRequest } from "../middleware/auth";
@@ -17,6 +18,11 @@ dotenv.config();
 export const getAllActiveDrivers = async (req: AuthenticatedRequest, res: Response) => {
     res.json(await getAllActiveDriversService())
 }
+
+export const updateStatusDriver = async (req: AuthenticatedRequest, res: Response) => {
+    res.json(await updateDriverStatusService(req.body.id, req.body.status))
+}
+
 
 export const getAllDrivers = async (req: AuthenticatedRequest, res: Response) => {
     res.json(await getAllDriversService())

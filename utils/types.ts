@@ -4,6 +4,11 @@ export interface CreateDriverProps {
     name: string,
 }
 
+export interface UpdateDriverStatusProps {
+    status?: string;
+}
+
+
 export interface UpdateDriverProps {
     id?:string;
     licenseNo?: string;

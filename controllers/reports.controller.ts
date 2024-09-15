@@ -1,9 +1,8 @@
 import * as dotenv from 'dotenv';
-import { NextFunction, Request, Response } from "express";
+import { Response } from "express";
 import { getAllDriversReportService } from "../services/driver";
 import { getAllRouteService } from "../services/route";
 import { AuthenticatedRequest } from "../middleware/auth";
-import { actions, resources, roles } from "../config/constants";
 
 dotenv.config();
 

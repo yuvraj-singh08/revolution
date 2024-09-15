@@ -38,6 +38,9 @@ const Driver = sequelize.define('Driver', {
     lastLocation: {
         type: DataTypes.JSON,  // Store last location as JSON
     },
+    status: {
+        type: DataTypes.STRING,
+    },
     active:{
         type: DataTypes.BOOLEAN,
         defaultValue: true
