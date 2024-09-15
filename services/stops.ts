@@ -3,6 +3,8 @@ import Route from "../models/Route.model";
 import Stop from "../models/Stop.model";
 import { readCsv } from "../utils/readCsv"
 import csvParser from 'csv-parser';
+import { StopStatusType } from "../utils/types";
+import HttpError from "../utils/httpError";
 
 export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
     try {
@@ -258,6 +260,25 @@ export const updateStopService = async (data: any) => {
         throw error;
     }
 }
+
+export const getStopsService  = async (date: string | undefined, status:string | undefined) => {
+    try {
+        let whereClause:any = {}
+        if (date) {
+            whereClause['uploadDate'] = date;
+        }
+        if(status){
+            whereClause['status'] = status;
+        }
+        const stops = await Stop.findAll({
+            where:whereClause
+        })
+        return stops;
+    } catch (error: any) {
+        console.log(error);
+        throw new HttpError(error.message, 400);
+    }
+} 
 
 // export const addStopService = async (stopData: any) => {
 //     try {

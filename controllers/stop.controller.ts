@@ -2,8 +2,9 @@ import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { checkPermissionService } from "../services/role";
 import { actions, resources } from "../config/constants";
-import { createCsvStopService, updateBulkStopService, updateStopService } from "../services/stops";
+import { createCsvStopService, getStopsService, updateBulkStopService, updateStopService } from "../services/stops";
 import moment from "moment";
+import HttpError from "../utils/httpError";
 
 export const createCsvStop = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -39,7 +40,7 @@ export const updateBulkStop = async (req: AuthenticatedRequest, res: Response, n
     try {
         const { data } = req.body;
         const { role } = req.user;
-//add checkPermission here and below
+        //add checkPermission here and below
         const updateStops = await updateBulkStopService(data);
         res.status(200).json({
             success: true,
@@ -73,5 +74,25 @@ export const updateStop = async (req: AuthenticatedRequest, res: Response, next:
             message: 'Failed to update bulk stop',
             error: error.message
         })
+    }
+}
+
+export const getStops = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { date, status } = req.query;
+        if (date && typeof date !== 'string') {
+            throw new HttpError("Invalid date format", 400);
+        }
+        if (status && typeof status !== 'string') {
+            throw new HttpError("Invalid status format", 400);
+        }
+        const stops = await getStopsService(date, status);
+        res.status(200).json({
+            success: true,
+            data: stops,
+            message: 'Stops fetched successfully'
+        });
+    } catch (error) {
+        next(error);
     }
 }
