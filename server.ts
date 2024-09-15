@@ -9,7 +9,7 @@ import rolesRouter from './routes/role.routes';
 import adminRouter from './routes/admin.routes';
 import stopRouter from './routes/stop.routes';
 import routeRouter from './routes/route.routes';
-
+import reportRouter from './routes/reports.routes';
 
 const app = express();
 
@@ -35,6 +35,7 @@ app.use('/api/role', rolesRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/stop', stopRouter);
 app.use('/api/route', routeRouter);
+app.use('/api/reports', reportRouter);
 
 app.use((err: any, req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const statusCode = err.statusCode || 500;

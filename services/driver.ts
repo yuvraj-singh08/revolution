@@ -5,6 +5,7 @@ import { CreateDriverProps, LoginDriverProps, UpdateDriverProps } from "../utils
 import jwt from 'jsonwebtoken';
 import HttpError from '../utils/httpError';
 import { roles } from '../config/constants';
+const { Op } = require('sequelize');
 
 export const getAllActiveDriversService = async () => {
     try {
@@ -19,6 +20,22 @@ export const getAllDriversService = async () => {
         return allDrivers ? allDrivers : null;
     } catch (error) { throw error; }
 }
+
+export const getAllDriversReportService = async (startDate: string, endDate: string): Promise<any | null> => {
+    try {
+        const allDrivers = await Driver.findAll({
+            where: {
+                createdAt: {
+                    [Op.between]: [new Date(startDate), new Date(endDate)]
+                }
+            }
+        });
+        return allDrivers.length > 0 ? allDrivers : null;
+    } catch (error) {
+        console.error('Error fetching drivers:', error);
+        throw error;
+    }
+};
 
 
 export const createDriverService = async ({ email, name, password }: CreateDriverProps) => {

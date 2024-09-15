@@ -3,6 +3,23 @@ import Driver from "../models/Driver.model";
 import Route from "../models/Route.model"
 import Stop from "../models/Stop.model"
 import { AssignRouteProps, GetRouteProps, StopStatusType } from "../utils/types";
+import { Op } from 'sequelize';
+
+export const getAllRouteService = async (startDate: string, endDate: string): Promise<any | null> => {
+    try {
+        const allDrivers = await Route.findAll({
+            where: {
+                createdAt: {
+                    [Op.between]: [new Date(startDate), new Date(endDate)]
+                }
+            }
+        });
+        return allDrivers.length > 0 ? allDrivers : null;
+    } catch (error) {
+        console.error('Error fetching routes:', error);
+        throw error;
+    }
+};
 
 export const getRouteService = async ({
     date,
