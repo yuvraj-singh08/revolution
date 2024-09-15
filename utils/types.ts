@@ -55,3 +55,14 @@ export type AssignRouteProps = {
     routeId: string,
     driverId: string,
 }
+
+export type AddStopParams = {
+    routeId: number,
+    latitude: number,
+    date: string,
+    longitude: number,
+    status: StopStatusType,
+    stopId: number,
+    serveAddress?: string,
+    accountNumber: string,
+}

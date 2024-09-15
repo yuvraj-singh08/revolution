@@ -3,7 +3,7 @@ import Route from "../models/Route.model";
 import Stop from "../models/Stop.model";
 import { readCsv } from "../utils/readCsv"
 import csvParser from 'csv-parser';
-import { StopStatusType } from "../utils/types";
+import { AddStopParams, StopStatusType } from "../utils/types";
 import HttpError from "../utils/httpError";
 
 export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
@@ -279,6 +279,49 @@ export const getStopsService  = async (date: string | undefined, status:string |
         throw new HttpError(error.message, 400);
     }
 } 
+
+export const addStopService = async({routeId, latitude, longitude, status, stopId, date}: AddStopParams) => {
+try {
+    let route = await Route.findOne({
+        where: {
+            routeId,
+            uploadDate: date
+        }
+    })
+
+    if(!route){
+        route = await Route.create({
+            routeId,
+            uploadDate: date
+        })
+    }
+
+    const stop = await Stop.findOne({
+        where:{
+            latitude,
+            longitude,
+            uploadDate: date,
+        }
+    })
+
+    if(stop){
+        throw new HttpError("Stop already exists", 400)
+    }
+
+    const newStop = await Stop.create({
+        routeId: route.get('id'),
+        latitude,
+        longitude,
+        status,
+        stopId,
+        uploadDate: date,
+    });
+    return newStop;
+} catch (error: any) {
+    console.log(error);
+    throw new HttpError(error.message, 400)
+}
+    }
 
 // export const addStopService = async (stopData: any) => {
 //     try {

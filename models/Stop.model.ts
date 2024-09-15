@@ -120,6 +120,10 @@ const Stop = sequelize.define('Stop', {
         {
             unique: true,
             fields: ['uploadDate', 'latitude', 'longitude', 'serveAddress'], // Unique constraint on these fields
+        },
+        {
+            unique: true,
+            fields: ['uploadDate', 'latitude', 'longitude'], // Unique constraint on these fields
         }
     ],
     timestamps: false,     // If you want Sequelize to manage `createdAt` and `updatedAt`

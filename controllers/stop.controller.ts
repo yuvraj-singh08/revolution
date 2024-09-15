@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { checkPermissionService } from "../services/role";
 import { actions, resources } from "../config/constants";
-import { createCsvStopService, getStopsService, updateBulkStopService, updateStopService } from "../services/stops";
+import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService } from "../services/stops";
 import moment from "moment";
 import HttpError from "../utils/httpError";
 
@@ -92,6 +92,35 @@ export const getStops = async (req: AuthenticatedRequest, res: Response, next: N
             data: stops,
             message: 'Stops fetched successfully'
         });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const addStop = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { role } = req.user;
+        const permission = await checkPermissionService(role.id, resources.CSV, actions.CREATE);
+        if (!permission) {
+            throw new HttpError("Insufficient permissions to add a stop", 400);
+        }
+        const {
+            routeId,
+            latitude,
+            date,
+            longitude,
+            status,
+            stopId,
+            serveAddress,
+            accountNumber,
+        } = req.body
+
+        if (routeId === undefined || latitude === undefined || longitude === undefined || date === undefined || status === undefined || stopId === undefined || accountNumber === undefined) {
+            throw new HttpError("Missing required fields", 400);
+        }
+
+        const newStop = await addStopService({ routeId, latitude, longitude, date, status, stopId, serveAddress, accountNumber })
+        res.status(201).json({ success: true, data: newStop })
     } catch (error) {
         next(error);
     }
