@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { addPermissionService, addResourceService, addUserRoleService, assignRoleService } from "../services/role";
+import { addPermissionService, addResourceService, addUserRoleService, assignRoleService, getAllResourceService } from "../services/role";
 import { Roles } from "../models/Role.model.group";
 
 export const addUserRole = async (req: Request, res: Response, next: NextFunction) => {
@@ -71,5 +71,14 @@ export const getAllRoles = async (req: Request, res: Response, next: NextFunctio
     } catch (error: any) {
         console.error(error);
         res.status(500).json({ success: false, error: error.message, message: "Failed to get role" });
+    }
+}
+
+export const getAllResources = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const resources = await getAllResourceService();
+        res.status(200).json({ success: true, data: resources });
+    } catch (error) {
+        next(error);
     }
 }

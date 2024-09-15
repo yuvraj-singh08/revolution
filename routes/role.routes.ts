@@ -8,5 +8,6 @@ router.post('/addResource', roleController.addResource);
 router.post('/addPermission', roleController.addPermission);
 router.post('/assignRole', roleController.assignRole);
 router.get('/allRoles', roleController.getAllRoles);
+router.get('/allResources', roleController.getAllResources);
 
 export default router;

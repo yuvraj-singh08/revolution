@@ -40,6 +40,15 @@ export const addPermissionService = async (roleId: number, resourceId: number, a
     }
 }
 
+export const getAllResourceService = async () => {
+    try {
+        const resources = await Resources.findAll();
+        return resources;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const checkPermissionService = async (roleId: number, resourceName: string, action: string) => {
     try {
         const permission = await Permissions.findOne({
