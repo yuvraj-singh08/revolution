@@ -27,17 +27,18 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
         const routePromises = csvData.map(async (data) => {
             try {
                 if (createdRouteId.has(data.ROUTE)) {
+                    console.log("Skipping");
                     return; // Skip if the route is already processed
                 }
         
-                // const existingRoute = await Route.findOne({
-                //     where: {
-                //         routeId: data.ROUTE,
-                //         uploadDate: date
-                //     }
-                // });
+                const existingRoute = await Route.findOne({
+                    where: {
+                        routeId: data.ROUTE,
+                        uploadDate: date
+                    }
+                });
         
-                // if (!existingRoute) {
+                if (!existingRoute) {
                 const newRoute = await Route.create({
                     routeId: data.ROUTE,
                     uploadDate: date,
@@ -48,18 +49,28 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                 
                 createdRouteId.set(data.ROUTE, newRouteData.id);
                 return newRoute;
-                // }
+                }
             } catch (error) {
                 console.log(error);
             }
         });
         
-        const newRoutes = await Promise.all(routePromises);
+        if(routePromises?.length>0)
+        await Promise.all(routePromises);
         console.log("Routes created");
 
         const promises = csvData.map( async (data) => {
             try {
-                const  routeId = createdRouteId.get(data.ROUTE)
+                let  routeId = createdRouteId.get(data.ROUTE)
+                if(!routeId){
+                    const route = await Route.findOne({
+                        where:{
+                            routeId: data.ROUTE,
+                            uploadDate: date
+                        }
+                    })
+                    routeId = route?.get('id') as unknown as string
+                }
 
                 const record = {
                     stopId: data.ROUTESTOP || null,
