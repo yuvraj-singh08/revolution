@@ -81,6 +81,7 @@ export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response
                 return;
             }
             driverId = req.query.driverId;
+            
         }
 
         if (driverId && typeof driverId !== "string") {
