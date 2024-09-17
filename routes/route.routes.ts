@@ -8,5 +8,8 @@ const router = express.Router();
 router.get('/', isAuth, routeController.getRoutes);
 router.post('/assign', isAuth, routeController.assignRoute);
 router.get('/assigned', isAuth, routeController.getAssignedRoutes);
+router.post('/activeRoute/create', isAuth, routeController.createActiveRoutes);
+router.get('/activeRoute', isAuth, routeController.getActiveRoutes);
+router.post('/activeRoute/finish', isAuth, routeController.finishRoute);
 
 export default router;

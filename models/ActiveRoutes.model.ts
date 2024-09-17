@@ -1,5 +1,7 @@
 import { DataTypes, Sequelize } from 'sequelize';
 import { sequelize } from '.';
+import Driver from './Driver.model';
+import Route from './Route.model';
 
 const ActiveRoutes = sequelize.define('activeRoutes', {
     id: {
@@ -16,15 +18,24 @@ const ActiveRoutes = sequelize.define('activeRoutes', {
             key: 'id',
         },
     },
-    driverId:{
+    driverId: {
         type: DataTypes.UUID,
         allowNull: false,
-        references:{
+        references: {
             model: 'drivers',
             key: 'id',
         }
     },
- }, {
+    startedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+    },
+    finishedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    }
+}, {
     tableName: 'activeRoutes',
     indexes: [
         {
@@ -34,5 +45,11 @@ const ActiveRoutes = sequelize.define('activeRoutes', {
     ],
     timestamps: true,
 });
+
+//Active Routes Association
+Driver.hasOne(ActiveRoutes, { foreignKey: 'driverId', as: "driver" })
+Route.hasOne(ActiveRoutes, { foreignKey: 'routeId', as: "route" })
+ActiveRoutes.belongsTo(Driver, { foreignKey: 'driverId', onDelete: 'CASCADE', as: "driver" })
+ActiveRoutes.belongsTo(Route, { foreignKey: 'routeId', onDelete: 'CASCADE', as: "route" })
 
 export default ActiveRoutes;

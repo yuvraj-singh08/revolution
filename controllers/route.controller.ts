@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { assignRouteService, getAssignedRoutesService, getRouteService } from "../services/route";
+import { assignRouteService, createActiveRouteService, finishRouteService, getActiveRoutesService, getAssignedRoutesService, getRouteService } from "../services/route";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { resources, roles, stopStatus } from "../config/constants";
 import { checkPermissionService } from "../services/role";
@@ -81,7 +81,7 @@ export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response
                 return;
             }
             driverId = req.query.driverId;
-            
+
         }
 
         if (driverId && typeof driverId !== "string") {
@@ -99,5 +99,90 @@ export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response
             success: false,
             message: error.message,
         })
+    }
+}
+
+export const createActiveRoutes = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const routeId = req.body.routeId;
+        let driverId;
+        const role = req.user.role;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions to assign a route'
+                });
+                return;
+            }
+            driverId = req.body.driverId;
+        }
+
+        const activeRoute = await createActiveRouteService(driverId, routeId);
+        res.status(201).json({ success: true, data: activeRoute });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getActiveRoutes = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        let driverId;
+        const role = req.user.role;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions to assign a route'
+                });
+                return;
+            }
+            driverId = req.query.driverId;
+        }
+
+        if (driverId && typeof driverId !== "string") {
+            res.status(400).json({ success: false, message: "Missing required field 'driverId' or invalid driverId format" });
+            return;
+        }
+
+        const activeRoutes = await getActiveRoutesService(driverId);
+        res.status(200).json({ success: true, data: activeRoutes });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const finishRoute = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const routeId = req.body.routeId;
+        let driverId;
+        const role = req.user.role;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions to assign a route'
+                });
+                return;
+            }
+            driverId = req.body.driverId;
+        }
+
+        const finishRoute = await finishRouteService(driverId, routeId);
+        res.status(200).json({ success: true, data: finishRoute });
+
+    } catch (error) {
+        next(error);
     }
 }

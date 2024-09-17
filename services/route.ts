@@ -1,9 +1,12 @@
+import moment from "moment";
+import ActiveRoutes from "../models/ActiveRoutes.model";
 import AssignedRoute from "../models/AssignedRoutes.model";
 import Driver from "../models/Driver.model";
 import Route from "../models/Route.model"
 import Stop from "../models/Stop.model"
+import HttpError from "../utils/httpError";
 import { AssignRouteProps, GetRouteProps, StopStatusType } from "../utils/types";
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 
 export const getAllRouteService = async (startDate: string, endDate: string): Promise<any | null> => {
     try {
@@ -208,6 +211,107 @@ export const getAssignedRoutesService = async (driverId: string | undefined, dat
 
         return assignedRoutes;
     } catch (error) {
+        throw error;
+    }
+}
+
+export const createActiveRouteService = async (driverId: string, routeId: string) => {
+    try {
+        const assignedRoute = await AssignedRoute.findOne({
+            where: {
+                routeId,
+                driverId
+            }
+        });
+        if (!assignedRoute) {
+            throw new HttpError('Driver is not assigned to this route', 400)
+        }
+        const activeRoute = await ActiveRoutes.create({
+            routeId,
+            driverId,
+        })
+        return activeRoute;
+    } catch (error: any) {
+        console.log(error);
+        // console.log(error.errors[0].message);
+        throw error;
+    }
+}
+
+export const getActiveRoutesService = async (driverId: string | undefined) => {
+    try {
+        let whereClause: any = {
+            finishedAt: null
+        }
+        if (driverId) {
+            whereClause.driverId = driverId
+        }
+
+        const activeRoutes = await Route.findAll({
+            order: [
+                ['routeId', 'ASC'],   // Order the routes by 'routeId' in ascending order
+            ],
+            include: [
+                {
+                    model: ActiveRoutes,
+                    as: 'route',
+                    where: whereClause,
+                    required: true,  // Only include routes that have assigned routes
+                    include: [
+                        {
+                            model: Driver,
+                            as: 'driver',  // Include the associated driver if necessary
+                        }
+                    ]
+                },
+            ],
+        });
+
+        return activeRoutes;
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const finishRouteService = async (driverId: string, routeId: string) => {
+    try {
+        const [[updatedRows], destroyed] = await Promise.all([
+            ActiveRoutes.update({
+                finishedAt: new Date(),
+            }, {
+                where: {
+                    driverId,
+                    routeId,
+                }
+            }),
+            AssignedRoute.destroy({
+                where: {
+                    driverId,
+                    routeId,
+                }
+            }),
+            Route.update({
+                status: 'COMPLETED',
+                completionTime: new Date()
+            }, {
+                where: {
+                    id: routeId,
+                }
+            })
+        ])
+
+        if (updatedRows === 0) {
+            throw new HttpError('No active route found for this driver and route', 400)
+        }
+
+        console.log("destroyed: ", destroyed);
+
+        return updatedRows;
+
+    } catch (error) {
+        console.log(error);
         throw error;
     }
 }
