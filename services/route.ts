@@ -47,6 +47,17 @@ export const getRouteService = async ({
             ],
             include: [
                 {
+                    model: AssignedRoute,
+                    as: 'assignedRoutes',
+                    required: false,  // Only include routes that have assigned routes
+                    include: [
+                        {
+                            model: Driver,
+                            as: 'assignedDriver',  // Include the associated driver if necessary
+                        }
+                    ]
+                },
+                {
                     model: Stop,
                     as: 'stops',
                 }
