@@ -316,3 +316,17 @@ export const finishRouteService = async (driverId: string, routeId: string) => {
         throw error;
     }
 }
+
+export const unAssignRouteService = async (driverId: string, routeId: string) => {
+    try {
+        const destroy = AssignedRoute.destroy({
+            where: {
+                driverId,
+                routeId
+            }
+        })
+        return destroy;
+    } catch (error) {
+        throw error;
+    }
+}

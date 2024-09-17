@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { assignRouteService, createActiveRouteService, finishRouteService, getActiveRoutesService, getAssignedRoutesService, getRouteService } from "../services/route";
+import { assignRouteService, createActiveRouteService, finishRouteService, getActiveRoutesService, getAssignedRoutesService, getRouteService, unAssignRouteService } from "../services/route";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { resources, roles, stopStatus } from "../config/constants";
 import { checkPermissionService } from "../services/role";
@@ -180,6 +180,32 @@ export const finishRoute = async (req: AuthenticatedRequest, res: Response, next
 
         const finishRoute = await finishRouteService(driverId, routeId);
         res.status(200).json({ success: true, data: finishRoute });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const unassignRoute = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const routeId = req.body.routeId;
+        let driverId;
+        const role = req.user.role;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions to assign a route'
+                });
+                return;
+            }
+        }
+
+        const destroy = await unAssignRouteService(driverId, routeId);
+        res.status(200).json({ success: true, data: destroy });
 
     } catch (error) {
         next(error);
