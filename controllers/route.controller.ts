@@ -81,6 +81,7 @@ export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response
                 return;
             }
             driverId = req.query.driverId;
+            
         }
 
         if (driverId && typeof driverId !== "string") {
@@ -92,7 +93,7 @@ export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response
             return;
         }
         const assignedRoutes = await getAssignedRoutesService(driverId, date);
-        res.status(200).json({ success: true, data: assignedRoutes });
+        res.status(200).json({ success: true, ...assignedRoutes });
     } catch (error: any) {
         res.status(500).json({
             success: false,

@@ -47,6 +47,17 @@ export const getRouteService = async ({
             ],
             include: [
                 {
+                    model: AssignedRoute,
+                    as: 'assignedRoutes',
+                    required: false,  // Only include routes that have assigned routes
+                    include: [
+                        {
+                            model: Driver,
+                            as: 'assignedDriver',  // Include the associated driver if necessary
+                        }
+                    ]
+                },
+                {
                     model: Stop,
                     as: 'stops',
                 }
@@ -144,7 +155,30 @@ export const getAssignedRoutesService = async (driverId: string | undefined, dat
             ],
         });
 
+        let faultyStops: any = [];
+        const routes = assignedRoutes.map((routeData: any) => {
+            let filteredStops: any = [];
+            routeData.get("stops").forEach((stop: any) => {
+                if (!stop.faulty) {
+                    filteredStops.push({
+                        ...(stop.get()),
+                        routeNo: routeData.routeId
+                    });  // Collect valid stops, and return them
+                } else {
+                    faultyStops.push({
+                        ...(stop.get()),
+                        routeNo: routeData.routeId
+                    });  // Collect faulty stops, but don't return anything
+                }
+            });
 
+            return {
+                ...routeData.get(),
+                stops: filteredStops
+            };
+
+        });
+        return { data: routes, faultyStops };
         // const assignedRoutes = await AssignedRoute.findAll({
         //     where: whereClause,
         //     order: [
