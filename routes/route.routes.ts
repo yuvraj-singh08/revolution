@@ -7,6 +7,6 @@ const router = express.Router();
 
 router.get('/', isAuth, routeController.getRoutes);
 router.post('/assign', isAuth, routeController.assignRoute);
-router.get('/assigned', routeController.getAssignedRoutes);
+router.get('/assigned', isAuth, routeController.getAssignedRoutes);
 
 export default router;

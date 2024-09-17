@@ -42,15 +42,17 @@ export const getRouteService = async ({
         const allRoutes = await Route.findAll({
             where: whereClause,
             order: [
-                ['routeId', 'ASC'],
+                ['routeId', 'ASC'],   // Order the routes by 'routeId' in ascending order
+                [{ model: Stop, as: 'stops' }, 'stopId', 'ASC'],  // Order the stops by 'stopId' in ascending order
             ],
             include: [
                 {
                     model: Stop,
                     as: 'stops',
                 }
-            ]
-        })
+            ],
+        });
+        
         let faultyStops: any = [];
         const routes = allRoutes.map((routeData: any) => {
             let filteredStops: any = [];
@@ -112,17 +114,31 @@ export const getAssignedRoutesService = async (driverId: string | undefined) => 
         }
         const assignedRoutes = await AssignedRoute.findAll({
             where: whereClause,
+            order: [
+                // First, sort by 'routeId' from the 'Route' model (aliased as 'assignedRoute')
+                [{ model: Route, as: 'assignedRoute' }, 'routeId', 'ASC'],   
+                // Sort by 'stopId' within the 'stops' association inside 'assignedRoute'
+                [ { model: Route, as: 'assignedRoute' }, { model: Stop, as: 'stops' }, 'stopId', 'ASC' ],
+            ],
             include: [
                 {
                     model: Route,
-                    as: 'assignedRoute',// Same as assigned in association
+                    as: 'assignedRoute', // Alias must match the association definition
+                    include: [
+                        {
+                            model: Stop,
+                            as: 'stops',  // Alias for the Stop model
+                        }
+                    ]
                 },
                 {
                     model: Driver,
                     as: 'assignedDriver',
                 }
             ]
-        })
+        });
+        
+        
         return assignedRoutes;
     } catch (error) {
         throw error;

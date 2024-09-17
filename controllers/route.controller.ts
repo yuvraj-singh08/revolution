@@ -50,8 +50,8 @@ export const assignRoute = async (req: AuthenticatedRequest, res: Response, next
                 });
                 return;
             }
+            driverId = req.body.driverId;
         }
-        driverId = req.body.driverId;
 
         const assignedRoute = await assignRouteService({ driverId, routeId });
         res.status(200).json({ success: true, data: assignedRoute });
@@ -66,7 +66,22 @@ export const assignRoute = async (req: AuthenticatedRequest, res: Response, next
 
 export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { driverId } = req.query
+        let driverId;
+        const role = req.user.role;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions to assign a route'
+                });
+                return;
+            }
+            driverId = req.query.driverId;
+        }
+
         if (driverId && typeof driverId !== "string") {
             res.status(400).json({ success: false, message: "Missing required field 'driverId' or invalid driverId format" });
             return;

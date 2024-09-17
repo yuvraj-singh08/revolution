@@ -41,7 +41,7 @@ ActiveRoutes.belongsTo(Driver, { foreignKey: 'driverId', onDelete: 'CASCADE', as
 ActiveRoutes.belongsTo(Route, { foreignKey: 'routeId', onDelete: 'CASCADE', as: "route" })
 
 // Assigned Routes Association
-AssignedRoute.belongsTo(Driver, { foreignKey: 'driverId', as: "assignedDriver" })
-AssignedRoute.belongsTo(Route, { foreignKey: 'routeId', as: "assignedRoute" })
-Driver.hasMany(AssignedRoute, { foreignKey: 'driverId', as: "assignedRoutes" })
-Route.hasOne(AssignedRoute, { foreignKey: 'routeId', as: "assignedDriver" })
+// AssignedRoute.belongsTo(Driver, { foreignKey: 'driverId', as: "assignedDriver" })
+// AssignedRoute.belongsTo(Route, { foreignKey: 'routeId', as: "assignedRoute" })
+// Driver.hasMany(AssignedRoute, { foreignKey: 'driverId', as: "assignedRoutes" })
+// Route.hasMany(AssignedRoute, { foreignKey: 'routeId', as: "assignedDriver" })

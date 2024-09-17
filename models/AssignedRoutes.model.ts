@@ -1,5 +1,7 @@
 import { DataTypes, Sequelize } from 'sequelize';
 import { sequelize } from '.';
+import Route from './Route.model';
+import Driver from './Driver.model';
 
 
 const AssignedRoute = sequelize.define('assigned_routes', {
@@ -30,14 +32,15 @@ const AssignedRoute = sequelize.define('assigned_routes', {
     indexes: [
         {
             unique: true,
-            fields: ['routeId', 'driverId']  // Unique index on the email field
-        },
-        {
-            unique: true,
             fields: ['routeId']  // Unique index on the email field
         },
     ],
     timestamps: true
 });
+
+AssignedRoute.belongsTo(Route, { foreignKey: 'routeId', as: 'assignedRoute' });
+Route.hasMany(AssignedRoute, { foreignKey: 'routeId', as: 'assignedRoutes' });
+AssignedRoute.belongsTo(Driver, { foreignKey: 'driverId', as: "assignedDriver" })
+Driver.hasMany(AssignedRoute, { foreignKey: 'driverId', as: "assignedRoutes" })
 
 export default AssignedRoute;
