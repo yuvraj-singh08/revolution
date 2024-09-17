@@ -66,6 +66,7 @@ export const assignRoute = async (req: AuthenticatedRequest, res: Response, next
 
 export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+        const date = req.query.date;
         let driverId;
         const role = req.user.role;
         if (role === roles.DRIVER) {
@@ -86,7 +87,11 @@ export const getAssignedRoutes = async (req: AuthenticatedRequest, res: Response
             res.status(400).json({ success: false, message: "Missing required field 'driverId' or invalid driverId format" });
             return;
         }
-        const assignedRoutes = await getAssignedRoutesService(driverId);
+        if (date && typeof date !== "string") {
+            res.status(400).json({ success: false, message: "Missing required field 'date' or invalid date format" });
+            return;
+        }
+        const assignedRoutes = await getAssignedRoutesService(driverId, date);
         res.status(200).json({ success: true, data: assignedRoutes });
     } catch (error: any) {
         res.status(500).json({

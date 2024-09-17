@@ -52,7 +52,7 @@ export const getRouteService = async ({
                 }
             ],
         });
-        
+
         let faultyStops: any = [];
         const routes = allRoutes.map((routeData: any) => {
             let filteredStops: any = [];
@@ -104,41 +104,74 @@ export const assignRouteService = async ({ driverId, routeId }: AssignRouteProps
     }
 }
 
-export const getAssignedRoutesService = async (driverId: string | undefined) => {
+export const getAssignedRoutesService = async (driverId: string | undefined, date: string | undefined) => {
     try {
-        let whereClause: any = {}
+        let whereClause: any = {}, dateFilter = {}
         if (driverId) {
             whereClause = {
                 driverId
             }
         }
-        const assignedRoutes = await AssignedRoute.findAll({
-            where: whereClause,
+        if (date) {
+            dateFilter = {
+                uploadDate: date
+            }
+        }
+
+        const assignedRoutes = await Route.findAll({
+            where: dateFilter,
             order: [
-                // First, sort by 'routeId' from the 'Route' model (aliased as 'assignedRoute')
-                [{ model: Route, as: 'assignedRoute' }, 'routeId', 'ASC'],   
-                // Sort by 'stopId' within the 'stops' association inside 'assignedRoute'
-                [ { model: Route, as: 'assignedRoute' }, { model: Stop, as: 'stops' }, 'stopId', 'ASC' ],
+                ['routeId', 'ASC'],   // Order the routes by 'routeId' in ascending order
+                [{ model: Stop, as: 'stops' }, 'stopId', 'ASC'],  // Order the stops by 'stopId' in ascending order
             ],
             include: [
                 {
-                    model: Route,
-                    as: 'assignedRoute', // Alias must match the association definition
+                    model: AssignedRoute,
+                    as: 'assignedRoutes',
+                    where: whereClause,
+                    required: true,  // Only include routes that have assigned routes
                     include: [
                         {
-                            model: Stop,
-                            as: 'stops',  // Alias for the Stop model
+                            model: Driver,
+                            as: 'assignedDriver',  // Include the associated driver if necessary
                         }
                     ]
                 },
                 {
-                    model: Driver,
-                    as: 'assignedDriver',
+                    model: Stop,
+                    as: 'stops',
                 }
-            ]
+            ],
         });
-        
-        
+
+
+        // const assignedRoutes = await AssignedRoute.findAll({
+        //     where: whereClause,
+        //     order: [
+        //         // First, sort by 'routeId' from the 'Route' model (aliased as 'assignedRoute')
+        //         [{ model: Route, as: 'assignedRoute' }, 'routeId', 'ASC'],   
+        //         // Sort by 'stopId' within the 'stops' association inside 'assignedRoute'
+        //         [ { model: Route, as: 'assignedRoute' }, { model: Stop, as: 'stops' }, 'stopId', 'ASC' ],
+        //     ],
+        //     include: [
+        //         {
+        //             model: Route,
+        //             as: 'assignedRoute', // Alias must match the association definition
+        //             include: [
+        //                 {
+        //                     model: Stop,
+        //                     as: 'stops',  // Alias for the Stop model
+        //                 }
+        //             ]
+        //         },
+        //         {
+        //             model: Driver,
+        //             as: 'assignedDriver',
+        //         }
+        //     ]
+        // });
+
+
         return assignedRoutes;
     } catch (error) {
         throw error;
