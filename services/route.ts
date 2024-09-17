@@ -277,20 +277,21 @@ export const getActiveRoutesService = async (driverId: string | undefined) => {
 
 export const finishRouteService = async (driverId: string, routeId: string) => {
     try {
+        let whereClause: any = {
+            routeId
+        }
+        if (driverId) {
+            whereClause.driverId = driverId
+        }
+
         const [[updatedRows], destroyed] = await Promise.all([
             ActiveRoutes.update({
                 finishedAt: new Date(),
             }, {
-                where: {
-                    driverId,
-                    routeId,
-                }
+                where: whereClause
             }),
             AssignedRoute.destroy({
-                where: {
-                    driverId,
-                    routeId,
-                }
+                where: whereClause
             }),
             Route.update({
                 status: 'COMPLETED',

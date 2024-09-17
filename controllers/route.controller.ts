@@ -176,7 +176,6 @@ export const finishRoute = async (req: AuthenticatedRequest, res: Response, next
                 });
                 return;
             }
-            driverId = req.body.driverId;
         }
 
         const finishRoute = await finishRouteService(driverId, routeId);
