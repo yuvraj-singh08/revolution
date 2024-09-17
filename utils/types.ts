@@ -30,6 +30,13 @@ export interface CreateAdminProps {
     name: string,
 }
 
+export interface UpdateAdminProps {
+    email: string,
+    password: string,
+    name: string,
+}
+
+
 export type UserActionType = {
     type: "create" | "read" | "update" | "delete"
 }

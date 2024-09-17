@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { createAdminService, loginAdminService } from "../services/admin";
+import { createAdminService, loginAdminService, updateAdminService, deleteAdminService } from "../services/admin";
+import { checkPermissionService } from "../services/role";
+import { AuthenticatedRequest } from "../middleware/auth";
+import { actions, resources, roles } from "../config/constants";
+
 import Admin from "../models/Admin.model";
 
 export const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
@@ -39,3 +43,64 @@ export const getAdmins = async (req: Request, res: Response, next: NextFunction)
         res.status(500).json({ success: false, error: error.message, message: "Something went wrong" });
     }
 }
+
+export const editAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        let adminId = req.body.adminId;
+        const updateData = req.body;
+        // const { role } = req.user;
+        // const updateData = req.body;
+        // let adminId;
+        // if (role === roles.ADMIN) {
+        //     adminId = req.user.id;
+        //     delete updateData.id;
+        //     delete updateData.password;
+        // }
+        // else {
+        //     const permission = await checkPermissionService(role.id, resources.ADMIN, actions.UPDATE);
+
+        //     if (!permission) {
+        //         res.status(403).json({
+        //             success: false,
+        //             message: 'Insufficient permissions to edit a driver'
+        //         });
+        //         return;
+        //     }
+        //     adminId = req.body.adminId;
+        // }
+
+
+
+        if (!adminId) {
+            return res.status(400).json({ success: false, error: "Missing required fields" });
+        }
+        const updatedAdmin = await updateAdminService(adminId, updateData);
+
+        if (!updatedAdmin) {
+            return res.status(404).json({ success: false, message: "Admin not found or update failed" });
+        }
+        return res.status(200).json({ success: true, error: false, data: updatedAdmin });
+
+    } catch (error: any) {
+        console.error(error);
+        // return res.status(500).json({ success: false, error: error.message, message: "Failed to edit driver" });
+        next(error);
+    }
+};
+
+export const deleteAdmin = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+    try {
+        const { id } = req.body;
+        if (typeof id !== 'string' || !id) {
+            return res.status(400).json({ message: 'Invalid Admin ID', success: false, error: true });
+        }
+        const deletedCount = await deleteAdminService(id);
+        if (deletedCount === 0) {
+            return res.status(404).json({ message: 'Admin not found', success: false, error: true });
+        }
+        return res.send({ message: 'Admin has been deleted', success: true, error: false });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({ message: `Error: ${error.message}`, error: true, success: false });
+    }
+};
