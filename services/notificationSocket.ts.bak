@@ -1,0 +1,81 @@
+// Import necessary modules
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, onSnapshot, query, where } from "firebase/firestore";
+
+
+function decodeToken(token:string) {
+  const payload = token.split('.')[1]; // Get the payload part
+  const decodedPayload = JSON.parse(atob(payload)); // Decode base64url
+  return decodedPayload;
+}
+
+
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBJ2oFN25_Ki15-isvg2i0rhcavTTGOjeE",
+ authDomain: "cleanindiachat.firebaseapp.com",
+ databaseURL: "https://cleanindiachat-default-rtdb.firebaseio.com",
+ projectId: "cleanindiachat",
+ storageBucket: "cleanindiachat.appspot.com",
+ messagingSenderId: "328417384966",
+ appId: "1:328417384966:web:ffc600ef9c5b5b8cb68187"
+};
+
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Socket.IO setup (assuming you are using Express)
+import { Server } from "socket.io";
+const io = new Server(Server); // Replace 'server' with your actual server instance
+
+export const socketCallback = (socket:WebSocket) => {
+  try {
+    const userType = socket.handshake.query["userType"];
+    const token = socket.handshake.query["token"];
+    const { user_id } = decodeToken(token);
+    const socketId = socket.id;
+
+    console.log(`User connected with address: ${socket.id}`);
+
+    // Listen for notifications
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'notifications'), where('to', '==', user_id)),
+      (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const notification = change.doc.data();
+            socket.emit('receiveNotification', notification);
+            console.log(`Notification received: ${notification.message}`);
+          }
+        });
+      }
+    );
+
+    socket.on('sendNotification', async (data) => {
+      const { to, from, title, message } = data;
+
+      // Save the notification to Firestore
+      await addDoc(collection(db, 'notifications'), {
+        from,
+        to,
+        title,
+        message,
+        timestamp: new Date() // or use FieldValue.serverTimestamp()
+      });
+
+      console.log(`Notification saved to Firestore: ${message}`);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected');
+      unsubscribe(); // Remove the listener when the user disconnects
+    });
+
+  } catch (error) {
+    console.error('Error handling socket connection:', error);
+    socket.disconnect(true); // Disconnect the socket if an error occurs
+  }
+};

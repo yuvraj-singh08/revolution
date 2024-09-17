@@ -8,6 +8,9 @@ router.post("/create", isAuth, driverController.createDriver);
 router.post("/login", driverController.loginDriver);
 router.post("/update", isAuth, driverController.editDriver);
 router.post("/delete", isAuth, driverController.deleteDriver);
+router.post("/setLocation", isAuth, driverController.setDriverLocation);
+router.post("/getLocation", isAuth, driverController.getDriverLocation);
+
 router.post("/updateStatus", isAuth, driverController.updateStatusDriver);
 
 router.get("/allActiveDrivers", driverController.getAllActiveDrivers);

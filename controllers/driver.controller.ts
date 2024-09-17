@@ -9,6 +9,8 @@ import {
     getAllDriversService,
     getDriverDetailService,
     updateDriverStatusService,
+    getLocationService,
+    setLocationService
 } from "../services/driver";
 import { checkPermissionService } from "../services/role";
 import { AuthenticatedRequest } from "../middleware/auth";
@@ -27,6 +29,15 @@ export const updateStatusDriver = async (req: AuthenticatedRequest, res: Respons
 export const getAllDrivers = async (req: AuthenticatedRequest, res: Response) => {
     res.json(await getAllDriversService())
 }
+
+export const setDriverLocation = async (req: AuthenticatedRequest, res: Response) => {
+    res.json(await setLocationService(req.body.id, req.body.coords))
+}
+
+export const getDriverLocation = async (req: AuthenticatedRequest, res: Response) => {
+    res.json(await getLocationService(req.body.id))
+}
+
 
 export const getDriverDetails = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

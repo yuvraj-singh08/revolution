@@ -6,7 +6,56 @@ import jwt from 'jsonwebtoken';
 import HttpError from '../utils/httpError';
 import { roles } from '../config/constants';
 import { where } from 'sequelize';
+import { createClient } from 'redis';
 const { Op } = require('sequelize');
+require('dotenv').config(); 
+const client = createClient({
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT)
+    }
+});
+
+client.on('error', (err) => {
+    console.error('Redis Client Error', err);
+});
+
+client.on('connect', () => {
+    console.log('Connected to Redis');
+});
+
+async function connect() {
+    try {
+        await client.connect();
+        console.log('Successfully connected to Redis');
+    } catch (error) {
+        console.error('Error connecting to Redis:', error);
+    }
+}
+connect();
+
+async function setKeyValue(key: string, value: string) {
+    try {
+        await client.set(key, value);
+        return true
+    } catch (error) {
+        console.error('Error setting key in Redis:', error);
+    }
+}
+
+// Function to get a value for a given key from Redis
+async function getValue(key: string): Promise<string | null> {
+    try {
+        const value = await client.get(key);
+        return value;
+    } catch (error) {
+        console.error('Error getting key from Redis:', error);
+        return null;
+    }
+}
+
+
 
 export const getAllActiveDriversService = async () => {
     try {
@@ -49,6 +98,14 @@ export const getAllDriversReportService = async (startDate: string, endDate: str
         throw error;
     }
 };
+
+export const getLocationService = async (driverID: string) => {
+   return await getValue(driverID);
+};
+
+export const setLocationService = async (driverID:string, Coords:string) => {
+  return await setKeyValue(driverID, Coords)
+}
 
 
 export const createDriverService = async ({ email, name, password }: CreateDriverProps) => {
