@@ -26,6 +26,11 @@ const AssignedRoute = sequelize.define('assigned_routes', {
             model: 'drivers',
             key: 'id',
         }
+    },
+    date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
     }
 }, {
     tableName: 'assigned_routes',    // Define table name explicitly
@@ -33,7 +38,7 @@ const AssignedRoute = sequelize.define('assigned_routes', {
         {
             unique: true,
             fields: ['routeId']  // Unique index on the email field
-        },
+        }
     ],
     timestamps: true
 });

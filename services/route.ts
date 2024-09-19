@@ -5,7 +5,7 @@ import Driver from "../models/Driver.model";
 import Route from "../models/Route.model"
 import Stop from "../models/Stop.model"
 import HttpError from "../utils/httpError";
-import { AssignRouteProps, GetRouteProps, StopStatusType } from "../utils/types";
+import { AssignRouteProps, GetRouteProps } from "../utils/types";
 import { Op, where } from 'sequelize';
 
 export const getAllRouteService = async (startDate: string, endDate: string): Promise<any | null> => {
@@ -113,8 +113,8 @@ export const assignRouteService = async ({ driverId, routeId }: AssignRouteProps
             driverId,
         })
         return assignedRoute;
-    } catch (error) {
-        throw error;
+    } catch (error: any) {
+        throw (error?.errors?.[0]?.message) ? new HttpError((error?.errors?.[0]?.message), 409) : error
     }
 }
 
@@ -217,14 +217,25 @@ export const getAssignedRoutesService = async (driverId: string | undefined, dat
 
 export const createActiveRouteService = async (driverId: string, routeId: string) => {
     try {
-        const assignedRoute = await AssignedRoute.findOne({
-            where: {
-                routeId,
-                driverId
-            }
-        });
+        const [assignedRoute, alreadyActive] = await Promise.all([
+            AssignedRoute.findOne({
+                where: {
+                    routeId,
+                    driverId
+                }
+            }),
+            ActiveRoutes.findOne({
+                where: {
+                    routeId,
+                    driverId
+                }
+            })
+        ])
         if (!assignedRoute) {
-            throw new HttpError('Driver is not assigned to this route', 400)
+            throw new HttpError('Driver is not assigned to this route', 409)
+        }
+        if (alreadyActive) {
+            throw new HttpError('Route is already active for this driver', 409)
         }
         const activeRoute = await ActiveRoutes.create({
             routeId,
@@ -233,8 +244,7 @@ export const createActiveRouteService = async (driverId: string, routeId: string
         return activeRoute;
     } catch (error: any) {
         console.log(error);
-        // console.log(error.errors[0].message);
-        throw error;
+        throw (error?.errors?.[0]?.message) ? new HttpError((error?.errors?.[0]?.message), 409) : error
     }
 }
 
@@ -250,6 +260,7 @@ export const getActiveRoutesService = async (driverId: string | undefined) => {
         const activeRoutes = await Route.findAll({
             order: [
                 ['routeId', 'ASC'],   // Order the routes by 'routeId' in ascending order
+                [{ model: Stop, as: 'stops' }, 'stopId', 'ASC'],
             ],
             include: [
                 {
@@ -264,6 +275,10 @@ export const getActiveRoutesService = async (driverId: string | undefined) => {
                         }
                     ]
                 },
+                {
+                    model: Stop,
+                    as: 'stops',
+                }
             ],
         });
 

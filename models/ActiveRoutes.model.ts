@@ -42,6 +42,10 @@ const ActiveRoutes = sequelize.define('activeRoutes', {
             unique: true,
             fields: ['routeId']
         },
+        {
+            unique: true,
+            fields: ['driverId']
+        }
     ],
     timestamps: true,
 });
