@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { assignRouteService, createActiveRouteService, finishRouteService, getActiveRoutesService, getAssignedRoutesService, getRouteService, unAssignRouteService } from "../services/route";
+import { assignRouteService, createActiveRouteService, finishRouteService, getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService } from "../services/route";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { resources, roles, stopStatus } from "../config/constants";
 import { checkPermissionService } from "../services/role";
+import HttpError from "../utils/httpError";
 
 export const getRoutes = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -207,6 +208,34 @@ export const unassignRoute = async (req: AuthenticatedRequest, res: Response, ne
         const destroy = await unAssignRouteService(driverId, routeId);
         res.status(200).json({ success: true, data: destroy });
 
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const leaveIncompleteRoute = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const routeId = req.body.routeId;
+        if (!routeId) {
+            throw new HttpError("routeId missing in the request", 400);
+        }
+        let driverId;
+        const role = req.user.role;
+        if (role === roles.DRIVER) {
+            driverId = req.user.id;
+        }
+        else {
+            if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+                res.status(403).json({
+                    success: false,
+                    message: 'Insufficient permissions form managing routes'
+                });
+                return;
+            }
+        }
+
+        const leaveRoute = await leaveIncompleteRouteService(driverId, routeId);
+        res.status(200).json({ success: true, data: leaveRoute });
     } catch (error) {
         next(error);
     }

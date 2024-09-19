@@ -332,9 +332,45 @@ export const finishRouteService = async (driverId: string, routeId: string) => {
     }
 }
 
+export const leaveIncompleteRouteService = async (driverId: string, routeId: string) => {
+    try {
+        let whereClause: any = {
+            routeId
+        }
+        if (driverId) {
+            whereClause.driverId = driverId
+        }
+
+        const [destroyActive, destroyAssigned] = await Promise.all([
+            ActiveRoutes.destroy({
+                where: whereClause
+            }),
+            AssignedRoute.destroy({
+                where: whereClause
+            })
+        ])
+
+        return { destroyActive, destroyAssigned }
+
+    } catch (error: any) {
+        throw (error?.errors?.[0]?.message) ? new HttpError((error?.errors?.[0]?.message), 409) : error
+    }
+}
+
 export const unAssignRouteService = async (driverId: string, routeId: string) => {
     try {
-        const destroy = AssignedRoute.destroy({
+        const activeRoute = await ActiveRoutes.findOne({
+            where: {
+                routeId,
+                driverId
+            }
+        })
+
+        if (activeRoute) {
+            throw new HttpError('This route is still active first leave the route.', 409)
+        }
+
+        const destroy = await AssignedRoute.destroy({
             where: {
                 driverId,
                 routeId
