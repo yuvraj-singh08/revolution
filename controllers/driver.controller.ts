@@ -17,6 +17,7 @@ import { AuthenticatedRequest } from "../middleware/auth";
 import { actions, resources, roles } from "../config/constants";
 import { createTransport } from 'nodemailer';
 dotenv.config();
+
 export const getAllActiveDrivers = async (req: AuthenticatedRequest, res: Response) => {
     res.json(await getAllActiveDriversService())
 }

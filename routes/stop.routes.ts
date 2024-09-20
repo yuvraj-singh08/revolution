@@ -10,5 +10,6 @@ router.post('/bulkUpdate', isAuth, stopController.updateBulkStop);
 router.post('/update', isAuth, stopController.updateStop);
 router.get('/', isAuth, stopController.getStops);
 router.post('/add', isAuth, stopController.addStop);
+router.post('/imgUpload', upload.single('image'), stopController.imgUpload);
 
 export default router;

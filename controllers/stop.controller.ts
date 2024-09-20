@@ -5,6 +5,51 @@ import { actions, resources } from "../config/constants";
 import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService } from "../services/stops";
 import moment from "moment";
 import HttpError from "../utils/httpError";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
+      }
+  });
+  
+  
+
+  export const imgUpload = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.file || !req.body.route || !req.body.stop) {
+            return res.status(400).json({ success: false, message: 'required paramenters not provided' });
+        }
+        const fileExtension = path.extname(req.file.originalname);
+        const formattedDate = (() => { const d = new Date(); return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear().toString().slice(-2); })();
+        const uniqueFilename = `${req.body.route}-${req.body.stop}_${formattedDate}${fileExtension}`;
+        const bucketName = process.env.S3_BUCKET_NAME;
+        const params = {
+            Bucket: bucketName,
+            Key: `${uniqueFilename}`,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
+        };
+        const command = new PutObjectCommand(params);
+        await s3Client.send(command);
+        const signedUrlExpireSeconds = 60 * 60 * 24
+        const url = await getSignedUrl(s3Client, command, { expiresIn: signedUrlExpireSeconds });
+        let s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFilename}`;
+
+        return res.json({ 
+            success: true, 
+            s3Url: s3Url
+        });
+    } catch (error) {
+        console.error('Error in image upload:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
 
 export const createCsvStop = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
