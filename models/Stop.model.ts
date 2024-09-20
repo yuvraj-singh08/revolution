@@ -31,7 +31,7 @@ const Stop = sequelize.define('Stop', {
         allowNull: true,
     },
     imageUrl: {
-        type: DataTypes.TEXT,
+        type: DataTypes.JSON,
         allowNull: true,
     },
     truckNo: {

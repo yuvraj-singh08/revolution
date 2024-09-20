@@ -22,12 +22,12 @@ const s3Client = new S3Client({
 
   export const imgUpload = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        if (!req.file || !req.body.route || !req.body.stop) {
+        if (!req.file || !req.body.stop) {
             return res.status(400).json({ success: false, message: 'required paramenters not provided' });
         }
         const fileExtension = path.extname(req.file.originalname);
         const formattedDate = (() => { const d = new Date(); return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear().toString().slice(-2); })();
-        const uniqueFilename = `${req.body.route}-${req.body.stop}_${formattedDate}${fileExtension}`;
+        const uniqueFilename = `${req.body.stop}-${formattedDate}${fileExtension}`;
         const bucketName = process.env.S3_BUCKET_NAME;
         const params = {
             Bucket: bucketName,
@@ -40,9 +40,22 @@ const s3Client = new S3Client({
         const signedUrlExpireSeconds = 60 * 60 * 24
         const url = await getSignedUrl(s3Client, command, { expiresIn: signedUrlExpireSeconds });
         let s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFilename}`;
-
+        try {
+            
+            let reqBody = {
+                "id":req.body.stop,
+                "imageUrl":s3Url
+            };
+           await updateStopService(reqBody);
+        } catch (error: any) {
+            console.log(error);
+            res.status(400).json({
+                success: false,
+                message: 'Failed to update bulk stop',
+                error: error.message
+            })
+        }
         return res.json({ 
-            success: true, 
             s3Url: s3Url
         });
     } catch (error) {
