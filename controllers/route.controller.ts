@@ -1,9 +1,31 @@
 import { NextFunction, Request, Response } from "express";
-import { assignRouteService, createActiveRouteService, finishRouteService, getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService } from "../services/route";
+import { assignRouteService, createActiveRouteService, finishRouteService, deleteRouteService, getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService } from "../services/route";
+import { deleteStopsforRouteService } from "../services/stops";
+
 import { AuthenticatedRequest } from "../middleware/auth";
 import { resources, roles, stopStatus } from "../config/constants";
 import { checkPermissionService } from "../services/role";
 import HttpError from "../utils/httpError";
+
+export const deleteRoutes =  async (req: Request, res: Response) => {
+console.log(req.body.routeId)
+try {
+    const { routeId } = req.body;
+    if (typeof routeId !== 'string' || !routeId) {
+        return res.status(400).json({ message: 'Invalid Route ID', success: false, error: true });
+    }
+    const deletedRouteCount = await deleteRouteService(routeId);
+    const deletedStopsCount = await deleteStopsforRouteService(routeId);
+
+    if (deletedRouteCount === 0) {
+        return res.status(404).json({ message: 'Route not found', success: false, error: true });
+    }
+    return res.send({ message: 'Route has been deleted', success: true, error: false });
+} catch (error: any) {
+    console.log(error);
+    return res.status(500).json({ message: `Error: ${error.message}`, error: true, success: false });
+}
+}
 
 export const getRoutes = async (req: Request, res: Response, next: NextFunction) => {
     try {

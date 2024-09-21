@@ -8,6 +8,20 @@ import HttpError from "../utils/httpError";
 import { AssignRouteProps, GetRouteProps } from "../utils/types";
 import { Op, where } from 'sequelize';
 
+export const deleteRouteService = async (id: string): Promise<any> => {
+    try {
+        const route = await Route.findByPk(id);
+        if (!route) {
+            return { message: 'Route not found' } ;
+        }
+        await route.destroy();
+        return { message: 'Route deleted successfully' };
+    } catch (error) {
+        console.error('Error deleting route:', error);
+        throw error;
+    }
+};  
+
 export const getAllRouteService = async (startDate: string, endDate: string): Promise<any | null> => {
     try {
         const allDrivers = await Route.findAll({

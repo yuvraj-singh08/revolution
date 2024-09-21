@@ -6,6 +6,21 @@ import csvParser from 'csv-parser';
 import { AddStopParams, StopStatusType } from "../utils/types";
 import HttpError from "../utils/httpError";
 
+export const deleteStopsforRouteService = async (routeId: string): Promise<any> => {
+    try {
+        const stops = await Stop.findByPk(routeId);
+        if (!stops) {
+            return { message: 'No Stops found for the Route' } ;
+        }
+        await stops.destroy();
+        return { message: 'Stops for given route deleted successfully' };
+    } catch (error) {
+        console.error('Error deleting stops:', error);
+        throw error;
+    }
+};  
+
+
 export const createCsvStopService = async (fileBuffer: any, date: string): Promise<any> => {
     try {
         let savedStops: any = []
