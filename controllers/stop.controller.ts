@@ -27,7 +27,9 @@ const s3Client = new S3Client({
         }
         const fileExtension = path.extname(req.file.originalname);
         const formattedDate = (() => { const d = new Date(); return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear().toString().slice(-2); })();
-        const uniqueFilename = `${req.body.stop}-${formattedDate}${fileExtension}`;
+        const uuid = uuidv4();
+        const uniqueFilename = `${req.body.stop}-${formattedDate}-${uuid}${fileExtension}`;
+
         const bucketName = process.env.S3_BUCKET_NAME;
         const params = {
             Bucket: bucketName,
