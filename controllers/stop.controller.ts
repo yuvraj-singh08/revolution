@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { checkPermissionService } from "../services/role";
 import { actions, resources } from "../config/constants";
-import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService } from "../services/stops";
+import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService, getStopImagesbyIdService } from "../services/stops";
 import moment from "moment";
 import HttpError from "../utils/httpError";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -40,18 +40,23 @@ const s3Client = new S3Client({
         const signedUrlExpireSeconds = 60 * 60 * 24
         const url = await getSignedUrl(s3Client, command, { expiresIn: signedUrlExpireSeconds });
         let s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFilename}`;
+        
+        let currentImgBulk = await getStopImagesbyIdService(req.body.stop)     
         try {
             
+            let currentImageUrl = currentImgBulk?.dataValues.imageUrl || '';
+            let updatedImageUrl = currentImageUrl ? `${currentImageUrl},${s3Url}` : s3Url;
+            
             let reqBody = {
-                "id":req.body.stop,
-                "imageUrl":s3Url
+                "id": req.body.stop,
+                "imageUrl": updatedImageUrl
             };
            await updateStopService(reqBody);
         } catch (error: any) {
             console.log(error);
             res.status(400).json({
                 success: false,
-                message: 'Failed to update bulk stop',
+                message: 'Failed to update stop images',
                 error: error.message
             })
         }

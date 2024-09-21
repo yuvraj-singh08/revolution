@@ -6,6 +6,25 @@ import csvParser from 'csv-parser';
 import { AddStopParams, StopStatusType } from "../utils/types";
 import HttpError from "../utils/httpError";
 
+
+export const getStopImagesbyIdService  = async (id: string) => {
+    try {
+        let whereClause:any = {id:id}
+        const imageUrl = await Stop.findOne({
+            attributes: ['imageUrl'],
+            where: whereClause
+          });
+          
+          
+        return imageUrl;
+    } catch (error: any) {
+        console.log(error);
+        throw new HttpError(error.message, 400);
+    }
+} 
+
+
+
 export const deleteStopsforRouteService = async (routeId: string): Promise<any> => {
     try {
         const stops = await Stop.findByPk(routeId);
