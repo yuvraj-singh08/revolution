@@ -265,7 +265,7 @@ export const createActiveRouteService = async (driverId: string, routeId: string
 export const getActiveRoutesService = async (driverId: string | undefined) => {
     try {
         let whereClause: any = {
-            finishedAt: null
+           
         }
         if (driverId) {
             whereClause.driverId = driverId
@@ -313,10 +313,8 @@ export const finishRouteService = async (driverId: string, routeId: string) => {
             whereClause.driverId = driverId
         }
 
-        const [[updatedRows], destroyed] = await Promise.all([
-            ActiveRoutes.update({
-                finishedAt: new Date(),
-            }, {
+        const [destroy, destroyed] = await Promise.all([
+            ActiveRoutes.destroy({
                 where: whereClause
             }),
             AssignedRoute.destroy({
@@ -332,13 +330,9 @@ export const finishRouteService = async (driverId: string, routeId: string) => {
             })
         ])
 
-        if (updatedRows === 0) {
-            throw new HttpError('No active route found for this driver and route', 400)
-        }
-
         console.log("destroyed: ", destroyed);
 
-        return updatedRows;
+        return destroy;
 
     } catch (error) {
         console.log(error);
