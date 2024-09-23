@@ -23,6 +23,26 @@ export const getStopImagesbyIdService  = async (id: string) => {
     }
 } 
 
+export const deleteStopsForDateService = async (uploadDate: Date): Promise<{ message: string; deletedCount: number }> => {
+    try {
+        const deletedStops = await Stop.destroy({
+            where: { uploadDate }
+        });
+
+        if (deletedStops === 0) {
+            return { message: 'No stops found for the given date', deletedCount: 0 };
+        }
+
+        return { 
+            message: `Successfully deleted ${deletedStops} stop(s) for the given date`,
+            deletedCount: deletedStops
+        };
+    } catch (error) {
+        console.error('Error deleting stops for the given date:', error);
+        throw new Error('Failed to delete stops');
+    }
+};
+
 
 
 export const deleteStopsforRouteService = async (routeId: string): Promise<any> => {
@@ -106,10 +126,21 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                     routeId = route?.get('id') as unknown as string
                 }
 
+
+                function formatLatLong(longitude: number | null): number | null {
+                    if (longitude === null) return null;
+                    const lonStr = String(longitude);
+                    if (lonStr.charAt(lonStr.length - 1) === '-') {
+                        return -parseFloat(lonStr.slice(0, lonStr.length - 1));
+                    }
+                    return longitude;
+                }
+
+
                 const record = {
                     stopId: data.ROUTESTOP || null,
                     latitude: data.SGPSLAT || null,
-                    longitude: data.SGPSLON || null,
+                    longitude: formatLatLong(data.SGPSLON),
                     routeId: routeId || null,
                     serveAddress: data.SERVADDR || null,
                     accountNumber: data['ACCT#'] || null,
@@ -124,7 +155,8 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                     message: data['W-MSG1'] || null,
                     faulty: false,
                 };
-
+                
+         
                 // const existingRecord = await Stop.findOne({
                 //     where: {
                 //         latitude: record.latitude,

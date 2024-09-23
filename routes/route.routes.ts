@@ -14,6 +14,7 @@ router.post('/activeRoute/finish', isAuth, routeController.finishRoute);
 router.post('/unassignRoute', isAuth, routeController.unassignRoute);
 router.post('/leaveIncompleteRoute', isAuth, routeController.leaveIncompleteRoute);
 router.post('/deleteRoute', isAuth, routeController.deleteRoutes);
+router.post('/deleteDayData', isAuth, routeController.deleteDayData);
 
 
 export default router;
