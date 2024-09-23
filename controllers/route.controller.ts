@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { assignRouteService, createActiveRouteService, finishRouteService, deleteRouteService, deleteRoutesByDateService, getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService } from "../services/route";
+import { assignRouteService, createActiveRouteService, finishRouteService, deleteRouteService, deleteRoutesByDateService,  getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService } from "../services/route";
 import { deleteStopsforRouteService, deleteStopsForDateService } from "../services/stops";
 
 import { AuthenticatedRequest } from "../middleware/auth";
@@ -12,9 +12,12 @@ console.log(req.body.uploadDate)
 try {
     const { uploadDate } = req.body;
     const deletedRouteCount = await deleteRoutesByDateService(uploadDate);
-    const deletedStopsCount = await deleteStopsForDateService(uploadDate);
+    if (deletedRouteCount.deletedCount != 0) {
+        const deletedStopsCount = await deleteStopsForDateService(uploadDate);
+        return res.send({ message: 'Route has been deleted for given Date', success: true, error: false });
+    }
+    return res.send({ message: 'Routes not deleted as they have already been assigned', success: false, error: true });
 
-    return res.send({ message: 'Route has been deleted for given Date', success: true, error: false });
 } catch (error: any) {
     console.log(error);
     return res.status(500).json({ message: `Error: ${error.message}`, error: true, success: false });

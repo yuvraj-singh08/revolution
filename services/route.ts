@@ -8,8 +8,10 @@ import HttpError from "../utils/httpError";
 import { AssignRouteProps, GetRouteProps } from "../utils/types";
 import { Op, where } from 'sequelize';
 
+
 export const deleteRoutesByDateService = async (uploadDate: Date): Promise<{ message: string; deletedCount: number }> => {
     try {
+        
         const deletedRoutes = await Route.destroy({
             where: { uploadDate },
         });
@@ -23,6 +25,7 @@ export const deleteRoutesByDateService = async (uploadDate: Date): Promise<{ mes
             deletedCount: deletedRoutes
         };
     } catch (error) {
+        return  { message: 'No routes can be deleted for the given date', deletedCount: 0 }
         console.error('Error deleting routes for given date:', error);
         throw new Error('Failed to delete routes');
     }
