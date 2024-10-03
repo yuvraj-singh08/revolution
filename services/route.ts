@@ -128,7 +128,7 @@ export const getRouteService = async ({
                 stops: filteredStops
             };
         });
-        return { data: routes, faultyStops };
+        return { data: allRoutes, faultyStops };
     } catch (error) {
         throw error;
     }
