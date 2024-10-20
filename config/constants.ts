@@ -15,7 +15,9 @@ export const stopStatus = {
     pending: 'PENDING',
     completed: 'COMPLETED',
     exception: 'EXCEPTION',
-    exceptionHandled: 'EXCEPTION_HANDLED'
+    exceptionHandled: 'EXCEPTION_HANDLED',
+    stopped: 'STOPPED',
+    notOut: 'NOT-OUT'
 }
 
 export const officeCoordinate = {
