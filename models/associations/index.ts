@@ -31,8 +31,8 @@ Stop.belongsTo(Route, { foreignKey: 'routeId', as: 'route' });
 
 
 // Driver and Stop association
-Driver.hasMany(Stop, { foreignKey: 'completedBy', as: 'driverStops' }); // A Driver can complete many Stops
-Stop.belongsTo(Driver, { foreignKey: 'completedBy', as: 'driver' }); // A Stop is completed by a Driver
+Driver.hasMany(Stop, { foreignKey: 'markedBy', as: 'driverStops' }); // A Driver can complete many Stops
+Stop.belongsTo(Driver, { foreignKey: 'markedBy', as: 'driver' }); // A Stop is completed by a Driver
 
 
 

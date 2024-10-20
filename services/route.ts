@@ -11,7 +11,7 @@ import { Op, where } from 'sequelize';
 
 export const deleteRoutesByDateService = async (uploadDate: Date): Promise<{ message: string; deletedCount: number }> => {
     try {
-        
+
         const deletedRoutes = await Route.destroy({
             where: { uploadDate },
         });
@@ -20,12 +20,12 @@ export const deleteRoutesByDateService = async (uploadDate: Date): Promise<{ mes
             return { message: 'No routes found for the given date', deletedCount: 0 };
         }
 
-        return { 
+        return {
             message: `Successfully deleted ${deletedRoutes} route(s) for the given date`,
             deletedCount: deletedRoutes
         };
     } catch (error) {
-        return  { message: 'No routes can be deleted for the given date', deletedCount: 0 }
+        return { message: 'No routes can be deleted for the given date', deletedCount: 0 }
         console.error('Error deleting routes for given date:', error);
         throw new Error('Failed to delete routes');
     }
@@ -37,7 +37,7 @@ export const deleteRouteService = async (id: string): Promise<any> => {
     try {
         const route = await Route.findByPk(id);
         if (!route) {
-            return { message: 'Route not found' } ;
+            return { message: 'Route not found' };
         }
         await route.destroy();
         return { message: 'Route deleted successfully' };
@@ -45,21 +45,34 @@ export const deleteRouteService = async (id: string): Promise<any> => {
         console.error('Error deleting route:', error);
         throw error;
     }
-};  
+};
 
 export const getAllRouteService = async (startDate: string, endDate: string): Promise<any | null> => {
     try {
-        const allDrivers = await Route.findAll({
+        const allRoutes = await Route.findAll({
             where: {
                 createdAt: {
                     [Op.between]: [new Date(startDate), new Date(endDate)]
                 }
-            }
+            },
+            include: [
+                {
+                    model: Stop,
+                    as: 'stops',
+                    include: [
+                        {
+                            model: Driver,
+                            as: 'driver',
+                            attributes: ['id', 'name']
+                        }
+                    ]
+                }
+            ]
         });
-        return allDrivers.length > 0 ? allDrivers : null;
-    } catch (error) {
+        return allRoutes.length > 0 ? allRoutes : null;
+    } catch (error: any) {
         console.error('Error fetching routes:', error);
-        throw error;
+        throw new HttpError(error.message, 400);
     }
 };
 
@@ -290,7 +303,7 @@ export const createActiveRouteService = async (driverId: string, routeId: string
 export const getActiveRoutesService = async (driverId: string | undefined) => {
     try {
         let whereClause: any = {
-           
+
         }
         if (driverId) {
             whereClause.driverId = driverId
