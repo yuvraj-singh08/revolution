@@ -18,7 +18,12 @@ app.use(express.json());
 
 // Built-in body parser for URL-encoded data
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+const corsOptions = {
+    origin: 'https://rsvsoftware.live',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
 
 app.get('/', (req: Request, res: Response) => {
     try {
