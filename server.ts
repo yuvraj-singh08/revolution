@@ -19,7 +19,7 @@ app.use(express.json());
 // Built-in body parser for URL-encoded data
 app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
-    origin: ['*', 'https://rsvsoftware.live'],
+    origin: ['*', 'https://rsvsoftware.live', 'http://localhost:5173', 'http://localhost:5174', 'https://jared.rsvsoftware.live'],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
