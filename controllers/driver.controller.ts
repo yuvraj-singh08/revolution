@@ -18,8 +18,82 @@ import { AuthenticatedRequest } from "../middleware/auth";
 import { actions, resources, roles } from "../config/constants";
 import { createTransport } from 'nodemailer';
 import Driver from '../models/Driver.model';
+import fs from 'fs';
+import path from 'path';
+
+const filePath = path.join(__dirname, '../config/notPickedUpList.txt');
 dotenv.config();
 const logger = new Logger();
+
+// Function to read the list from the text file
+const readListFromFile = async (): Promise<string[]> => {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, 'utf8', (err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            // Split by newline and filter out empty lines
+            resolve(data.split('\n').filter(item => item.trim() !== ''));
+        });
+    });
+};
+
+// Function to write the list to the text file
+const writeListToFile = async (list: string[]): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filePath, list.join('\n'), 'utf8', (err) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve();
+        });
+    });
+};
+
+export const GetNotPickedUpList = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const list = await readListFromFile();
+        res.json(list);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to read the list.' });
+    }
+};
+
+export const AddNotPickedUpList = async (req: Request, res: Response): Promise<void> => {
+    const { item }: { item?: string } = req.body;
+
+    if (!item) {
+        res.status(400).json({ error: 'Item is required.' });
+        return;
+    }
+
+    try {
+        const list = await readListFromFile();
+        list.push(item);
+        await writeListToFile(list);
+        res.json({ message: 'Item added successfully.', list });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add item.' });
+    }
+};
+
+export const DeleteNotPickedUpList = async (req: Request, res: Response): Promise<void> => {
+    const { item }: { item?: string } = req.body;
+
+    if (!item) {
+        res.status(400).json({ error: 'Item is required.' });
+        return;
+    }
+
+    try {
+        let list = await readListFromFile();
+        list = list.filter(existingItem => existingItem !== item);
+        await writeListToFile(list);
+        res.json({ message: 'Item removed successfully.', list });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete item.' });
+    }
+};
 
 export const getAllActiveDrivers = async (req: AuthenticatedRequest, res: Response) => {
     res.json(await getAllActiveDriversService())
