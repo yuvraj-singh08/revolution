@@ -25,53 +25,57 @@ export const getAllActiveDrivers = async (req: AuthenticatedRequest, res: Respon
     res.json(await getAllActiveDriversService())
 }
 
-export const driverPasswordResetRequest = async (req: AuthenticatedRequest, res: Response) => {
-    const email = req.body.email;
-    if (!email) {
-        res.status(400).json({
-            error: true,
-            message: 'Email is required'
+export const driverPasswordResetRequest = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const email = req.body.email;
+        if (!email) {
+            res.status(400).json({
+                error: true,
+                message: 'Email is required'
+            })
+            return;
+        }
+        const driver = await Driver.findOne({
+            where: {
+                email
+            }
         })
-        return;
-    }
-    const driver = await Driver.findOne({
-        where: {
-            email
+        if (!driver) {
+            res.status(404).json({
+                error: true,
+                message: 'Driver not found',
+            })
+            return;
         }
-    })
-    if (!driver) {
-        res.status(404).json({
-            error: true,
-            message: 'Driver not found',
-        })
-        return;
-    }
-    const transporter = createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.MAILER_ID,
-            pass: process.env.MAILER_KEY
-        }
-    });
+        const transporter = createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.MAILER_ID,
+                pass: process.env.MAILER_KEY
+            }
+        });
 
-    const mailOptions = {
-        from: process.env.MAILER_ID,
-        to: req.user.email,
-        subject: 'Password Reset Request',
-        text: `Hello Admin, \n\nA password reset Request has been raised by user with Email: ${email}\n\nPlease change their password.`
-    };
+        const mailOptions = {
+            from: process.env.MAILER_ID,
+            to: req.user.email,
+            subject: 'Password Reset Request',
+            text: `Hello Admin, \n\nA password reset Request has been raised by user with Email: ${email}\n\nPlease change their password.`
+        };
 
-    // Send the email and commit only if the email is sent successfully
-    transporter.sendMail(mailOptions, async (error: Error | null, info: { response: string }) => {
-        if (error) {
-            console.log('Error sending email:', error);
-            return res.send({ message: 'Failed to send Email', error: true });
-        } else {
-            console.log('Email sent:', info.response);
-            logger.logEvent('DRIVER_ACTION', `Driver Password Reset Requested for ${req.body.email}`);
-            return res.send({ message: 'Password Reset Request Sent', error: false });
-        }
-    });
+        // Send the email and commit only if the email is sent successfully
+        transporter.sendMail(mailOptions, async (error: Error | null, info: { response: string }) => {
+            if (error) {
+                console.log('Error sending email:', error);
+                return res.send({ message: 'Failed to send Email', error: true });
+            } else {
+                console.log('Email sent:', info.response);
+                logger.logEvent('DRIVER_ACTION', `Driver Password Reset Requested for ${req.body.email}`);
+                return res.send({ message: 'Password Reset Request Sent', error: false });
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
 
 }
 

@@ -8,7 +8,7 @@ import { roles } from '../config/constants';
 import { where } from 'sequelize';
 import { createClient } from 'redis';
 const { Op } = require('sequelize');
-require('dotenv').config(); 
+require('dotenv').config();
 const client = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
@@ -45,7 +45,7 @@ async function setKeyValue(key: string, value: string) {
 }
 
 // Function to get a value for a given key from Redis
-async function getValue(key: string): Promise<string | null> {
+export async function getValue(key: string): Promise<string | null> {
     try {
         const value = await client.get(key);
         return value;
@@ -73,7 +73,7 @@ export const getAllDriversService = async () => {
 
 export const updateDriverStatusService = async (driverId: string, status: UpdateDriverStatusProps) => {
     try {
-        await Driver.update({status}, { where: { id:driverId } });
+        await Driver.update({ status }, { where: { id: driverId } });
         const driver = await Driver.findByPk(driverId);
         return driver
     } catch (error) {
@@ -100,11 +100,11 @@ export const getAllDriversReportService = async (startDate: string, endDate: str
 };
 
 export const getLocationService = async (driverID: string) => {
-   return await getValue(driverID);
+    return await getValue(driverID);
 };
 
-export const setLocationService = async (driverID:string, Coords:string) => {
-  return await setKeyValue(driverID, Coords)
+export const setLocationService = async (driverID: string, Coords: string) => {
+    return await setKeyValue(driverID, Coords)
 }
 
 
@@ -169,6 +169,7 @@ export const loginDriverService = async ({ email, password }: LoginDriverProps) 
             role: roles.DRIVER
         }
         const token = jwt.sign(userSessionData, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+        setKeyValue(userData.id, token);
         return { data: { ...userData }, token };
     } catch (error) {
         throw error;
