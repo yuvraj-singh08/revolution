@@ -169,7 +169,7 @@ export const loginDriverService = async ({ email, password }: LoginDriverProps) 
             role: roles.DRIVER
         }
         const token = jwt.sign(userSessionData, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
-        setKeyValue(userData.id, token);
+        setKeyValue(`${userData.id}token`, token);
         return { data: { ...userData }, token };
     } catch (error) {
         throw error;
