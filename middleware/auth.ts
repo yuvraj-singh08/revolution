@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { getValue } from '../services/driver';
+import { roles } from '../config/constants';
 
 export interface AuthenticatedRequest extends Request {
   user?: any; // You can define a more specific type for the user
@@ -19,9 +20,11 @@ const isAuth = async (req: AuthenticatedRequest, res: Response, next: NextFuncti
 
     // Attach decoded token data to req.user (or req.auth)
     req.user = decoded;
-    const driverToken = await getValue(req?.user?.id)
-    if (token !== driverToken) {
-      return res.status(401).json({ message: "Logged in using other device" })
+    if (req.user.role === roles.DRIVER) {
+      const driverToken = await getValue(req?.user?.id)
+      if (token !== driverToken) {
+        return res.status(401).json({ message: "Logged in using other device" })
+      }
     }
 
     next(); // Proceed to the next middleware or route handler
