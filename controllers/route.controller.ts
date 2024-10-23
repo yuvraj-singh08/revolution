@@ -218,7 +218,7 @@ export const finishRoute = async (req: AuthenticatedRequest, res: Response, next
             if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
                 res.status(403).json({
                     success: false,
-                    message: 'Insufficient permissions to assign a route'
+                    message: 'Insufficient permissions to make changes to route'
                 });
                 return;
             }
