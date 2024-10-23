@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { createAdminService, loginAdminService, updateAdminService, deleteAdminService } from "../services/admin";
+import Logger from '../middleware/Logger'
 import { checkPermissionService } from "../services/role";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { actions, resources, roles } from "../config/constants";
 
 import Admin from "../models/Admin.model";
+const logger = new Logger();
 
 export const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -13,6 +15,7 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
             return res.status(400).json({ error: "Missing required fields" });
         }
         const createdUser = await createAdminService({ email, password, name });
+        logger.logEvent('USER_ACTION', `Admin User Created with ${email}`);
         res.status(201).json({ success: true, message: "Created New Admin", data: createdUser });
     } catch (error: any) {
         console.error(error);
@@ -27,6 +30,7 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
             return res.status(400).json({ error: "Missing required fields" });
         }
         const user = await loginAdminService({ email, password });
+        logger.logEvent('USER_ACTION', `Admin Login with email ${email}`);
         res.status(201).json({ success: true, message: "LogIn Successful", ...user });
     } catch (error: any) {
         console.error(error);
@@ -79,6 +83,7 @@ export const editAdmin = async (req: AuthenticatedRequest, res: Response, next: 
         if (!updatedAdmin) {
             return res.status(404).json({ success: false, message: "Admin not found or update failed" });
         }
+        logger.logEvent('USER_ACTION', `Admin User Updated with id ${adminId}`);
         return res.status(200).json({ success: true, error: false, data: updatedAdmin });
 
     } catch (error: any) {
@@ -98,6 +103,7 @@ export const deleteAdmin = async (req: AuthenticatedRequest, res: Response): Pro
         if (deletedCount === 0) {
             return res.status(404).json({ message: 'Admin not found', success: false, error: true });
         }
+        logger.logEvent('USER_ACTION', `Admin User Deleted with id ${id}`);
         return res.send({ message: 'Admin has been deleted', success: true, error: false });
     } catch (error: any) {
         console.log(error);

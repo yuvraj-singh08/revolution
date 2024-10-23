@@ -9,6 +9,8 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import Logger from '../middleware/Logger'
+const logger = new Logger();
 
 const s3Client = new S3Client({
     region: process.env.AWS_REGION || 'us-east-1',
@@ -62,6 +64,8 @@ const s3Client = new S3Client({
                 error: error.message
             })
         }
+        logger.logEvent('STOP_ACTION', `Stop with ID: ${req.body.stop} , Image added at ${s3Url}`);
+
         return res.json({ 
             s3Url: s3Url
         });
@@ -107,6 +111,7 @@ export const updateBulkStop = async (req: AuthenticatedRequest, res: Response, n
         const { role } = req.user;
         //add checkPermission here and below
         const updateStops = await updateBulkStopService(data);
+        logger.logEvent('STOP_ACTION', `Bulk Stop Update Event Triggered`);
         res.status(200).json({
             success: true,
             data: updateStops,
@@ -127,6 +132,7 @@ export const updateStop = async (req: AuthenticatedRequest, res: Response, next:
         const { role } = req.user;
 
         const updateStops = await updateStopService(data);
+        logger.logEvent('STOP_ACTION', `Stop Update Action Triggered`);
         res.status(200).json({
             success: true,
             data: updateStops,
@@ -185,6 +191,8 @@ export const addStop = async (req: AuthenticatedRequest, res: Response, next: Ne
         }
 
         const newStop = await addStopService({ routeId, latitude, longitude, date, status, stopId, serveAddress, accountNumber })
+        logger.logEvent('STOP_ACTION', `new Stop added with Route ID: ${routeId} , StopID ${stopId}`);
+
         res.status(201).json({ success: true, data: newStop })
     } catch (error) {
         next(error);

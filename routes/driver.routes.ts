@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/create", isAuth, driverController.createDriver);
 router.post("/login", driverController.loginDriver);
 router.post("/update", isAuth, driverController.editDriver);
-router.post("/PassResetRequest", isAuth, driverController.driverPasswordResetRequest);
+router.post("/PassResetRequest", driverController.driverPasswordResetRequest);
 router.post("/delete", isAuth, driverController.deleteDriver);
 router.post("/setLocation", isAuth, driverController.setDriverLocation);
 router.post("/getLocation", isAuth, driverController.getDriverLocation);

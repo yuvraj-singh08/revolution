@@ -12,11 +12,13 @@ import {
     getLocationService,
     setLocationService
 } from "../services/driver";
+import Logger from '../middleware/Logger'
 import { checkPermissionService } from "../services/role";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { actions, resources, roles } from "../config/constants";
 import { createTransport } from 'nodemailer';
 dotenv.config();
+const logger = new Logger();
 
 export const getAllActiveDrivers = async (req: AuthenticatedRequest, res: Response) => {
     res.json(await getAllActiveDriversService())
@@ -45,6 +47,7 @@ export const driverPasswordResetRequest = async (req: AuthenticatedRequest, res:
             return res.send({ message: 'Failed to send Email', error: true });
         } else {
             console.log('Email sent:', info.response);
+            logger.logEvent('DRIVER_ACTION', `Driver Password Reset Requested for ${req.body.email}`);
             return res.send({ message: 'Password Reset Request Sent', error: false });
         }
     });
@@ -52,6 +55,7 @@ export const driverPasswordResetRequest = async (req: AuthenticatedRequest, res:
 }
 
 export const updateStatusDriver = async (req: AuthenticatedRequest, res: Response) => {
+    logger.logEvent('DRIVER_ACTION', `Driver Status Updated for ${req.body.id} to ${req.body.status}`);
     res.json(await updateDriverStatusService(req.body.id, req.body.status))
 }
 
@@ -143,7 +147,7 @@ export const createDriver = async (req: AuthenticatedRequest, res: Response, nex
             }
         });
 
-
+        logger.logEvent('DRIVER_ACTION', `Driver Created with email ${req.body.email}`);
         return res.status(201).json({ success: true, message: "Created New Driver", data: createdDriver });
     } catch (error: any) {
         console.error(error);
@@ -158,6 +162,7 @@ export const loginDriver = async (req: Request, res: Response, next: NextFunctio
             return res.status(400).json({ error: "Missing required fields" });
         }
         const user = await loginDriverService({ email, password });
+        logger.logEvent('DRIVER_ACTION', `Driver logged in with email ${email}`);
         res.status(201).json({ success: true, message: "LogIn Successful", ...user });
     } catch (error: any) {
         console.error(error);
@@ -222,6 +227,7 @@ export const editDriver = async (req: AuthenticatedRequest, res: Response, next:
                 // return res.send({ message: 'Registration successful, but failed to send email', error: true });
             } else {
                 console.log('Email sent:', info.response);
+                logger.logEvent('DRIVER_ACTION', `Driver Updated for ${updatedDriver.dataValues.email}`);
                 return res.status(200).json({ success: true, error: false, data: updatedDriver });
             }
         }); 
@@ -242,6 +248,7 @@ export const deleteDriver = async (req: AuthenticatedRequest, res: Response): Pr
         if (deletedCount === 0) {
             return res.status(404).json({ message: 'Driver not found', success: false, error: true });
         }
+        logger.logEvent('DRIVER_ACTION', `Driver Deleted with id ${id}`);
         return res.send({ message: 'Driver has been deleted', success: true, error: false });
     } catch (error: any) {
         console.log(error);

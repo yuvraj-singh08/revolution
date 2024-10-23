@@ -1,11 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { assignRouteService, createActiveRouteService, finishRouteService, deleteRouteService, deleteRoutesByDateService,  getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService } from "../services/route";
 import { deleteStopsforRouteService, deleteStopsForDateService } from "../services/stops";
+import Logger from '../middleware/Logger'
 
 import { AuthenticatedRequest } from "../middleware/auth";
 import { resources, roles, stopStatus } from "../config/constants";
 import { checkPermissionService } from "../services/role";
 import HttpError from "../utils/httpError";
+const logger = new Logger();
 
 export const deleteDayData =  async (req: Request, res: Response) => {
 console.log(req.body.uploadDate)
@@ -14,8 +16,10 @@ try {
     const deletedRouteCount = await deleteRoutesByDateService(uploadDate);
     if (deletedRouteCount.deletedCount != 0) {
         const deletedStopsCount = await deleteStopsForDateService(uploadDate);
+        logger.logEvent('Route_ACTION', `Route Data Deleted for date ${uploadDate}`);
         return res.send({ message: 'Route has been deleted for given Date', success: true, error: false });
     }
+    logger.logEvent('Route_ACTION', `Route Data Not Deleted for date ${uploadDate}, as it was already Assigned`);
     return res.send({ message: 'Routes not deleted as they have already been assigned', success: false, error: true });
 
 } catch (error: any) {
@@ -37,6 +41,7 @@ export const deleteRoutes =  async (req: Request, res: Response) => {
         if (deletedRouteCount === 0) {
             return res.status(404).json({ message: 'Route not found', success: false, error: true });
         }
+        logger.logEvent('Route_ACTION', `Route Data Deleted for RouteId ${routeId}`);
         return res.send({ message: 'Route has been deleted', success: true, error: false });
     } catch (error: any) {
         console.log(error);
@@ -94,6 +99,7 @@ export const assignRoute = async (req: AuthenticatedRequest, res: Response, next
         }
 
         const assignedRoute = await assignRouteService({ driverId, routeId });
+        logger.logEvent('Route_ACTION', `Route Id: ${routeId} , is assigned to driverId: ${driverId}`);
         res.status(200).json({ success: true, data: assignedRoute });
 
     } catch (error: any) {
@@ -219,6 +225,7 @@ export const finishRoute = async (req: AuthenticatedRequest, res: Response, next
         }
 
         const finishRoute = await finishRouteService(driverId, routeId);
+        logger.logEvent('Route_ACTION', `Route Id ${routeId} , finished by Driver Id:  ${driverId}`);
         res.status(200).json({ success: true, data: finishRoute });
 
     } catch (error) {
@@ -245,6 +252,8 @@ export const unassignRoute = async (req: AuthenticatedRequest, res: Response, ne
         }
 
         const destroy = await unAssignRouteService(driverId, routeId);
+        logger.logEvent('Route_ACTION', `Route id: ${routeId} ,  unassigned from driver Id: ${driverId}`);
+
         res.status(200).json({ success: true, data: destroy });
 
     } catch (error) {
@@ -274,6 +283,8 @@ export const leaveIncompleteRoute = async (req: AuthenticatedRequest, res: Respo
         }
 
         const leaveRoute = await leaveIncompleteRouteService(driverId, routeId);
+        logger.logEvent('Route_ACTION', `Route Id: ${routeId} , is left incompleted by driver Id: ${driverId}`);
+
         res.status(200).json({ success: true, data: leaveRoute });
     } catch (error) {
         next(error);
