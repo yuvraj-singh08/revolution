@@ -22,6 +22,35 @@ export const getAllActiveDrivers = async (req: AuthenticatedRequest, res: Respon
     res.json(await getAllActiveDriversService())
 }
 
+export const driverPasswordResetRequest = async (req: AuthenticatedRequest, res: Response) => {
+    const transporter = createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.MAILER_ID,
+            pass: process.env.MAILER_KEY
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.MAILER_ID,
+        to: req.user.email,
+        subject: 'Password Reset Request',
+        text: `Hello Admin, \n\nA password reset Request has been raised by user with Email: ${req.body.email}\n\nPlease change their password.`
+    };
+
+    // Send the email and commit only if the email is sent successfully
+    transporter.sendMail(mailOptions, async (error: Error | null, info: { response: string }) => {
+        if (error) {
+            console.log('Error sending email:', error);
+            return res.send({ message: 'Failed to send Email', error: true });
+        } else {
+            console.log('Email sent:', info.response);
+            return res.send({ message: 'Password Reset Request Sent', error: false });
+        }
+    });
+
+}
+
 export const updateStatusDriver = async (req: AuthenticatedRequest, res: Response) => {
     res.json(await updateDriverStatusService(req.body.id, req.body.status))
 }
@@ -164,13 +193,38 @@ export const editDriver = async (req: AuthenticatedRequest, res: Response, next:
         if (!driverId) {
             return res.status(400).json({ success: false, error: "Missing required fields" });
         }
+        const PTpass = req.body.password;
         const updatedDriver = await updateDriverService(driverId, updateData);
 
         if (!updatedDriver) {
             return res.status(404).json({ success: false, message: "Driver not found or update failed" });
         }
-        return res.status(200).json({ success: true, error: false, data: updatedDriver });
+        
 
+        const transporter = createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.MAILER_ID,
+                pass: process.env.MAILER_KEY
+            }
+        });
+    
+        const mailOptions = {
+            from: process.env.MAILER_ID,
+            to: updatedDriver.dataValues.email,
+            subject: 'Password Reset Successful',
+            text: `Hello ${req.body.name}, \n\nYour Password was successfully Reset!\n\nHere is the new Password: ${PTpass}`
+        };
+    
+        transporter.sendMail(mailOptions, async (error: Error | null, info: { response: string }) => {
+            if (error) {
+                console.log('Error sending email:', error);
+                // return res.send({ message: 'Registration successful, but failed to send email', error: true });
+            } else {
+                console.log('Email sent:', info.response);
+                return res.status(200).json({ success: true, error: false, data: updatedDriver });
+            }
+        }); 
     } catch (error: any) {
         console.error(error);
         // return res.status(500).json({ success: false, error: error.message, message: "Failed to edit driver" });
