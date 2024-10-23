@@ -21,7 +21,7 @@ const isAuth = async (req: AuthenticatedRequest, res: Response, next: NextFuncti
     req.user = decoded;
     const driverToken = await getValue(req?.user?.id)
     if (token !== driverToken) {
-      return res.status(403).json({ message: "Logged in using other device" })
+      return res.status(401).json({ message: "Logged in using other device" })
     }
 
     next(); // Proceed to the next middleware or route handler

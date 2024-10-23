@@ -57,7 +57,7 @@ export const driverPasswordResetRequest = async (req: AuthenticatedRequest, res:
 
         const mailOptions = {
             from: process.env.MAILER_ID,
-            to: req.user.email,
+            to: process.env.ADMIN_MAIL,
             subject: 'Password Reset Request',
             text: `Hello Admin, \n\nA password reset Request has been raised by user with Email: ${email}\n\nPlease change their password.`
         };
