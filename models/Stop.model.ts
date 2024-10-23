@@ -113,6 +113,10 @@ const Stop = sequelize.define('Stop', {
     faulty: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,  // Default value for faulty is false
+    },
+    driverLocation: {
+        type: DataTypes.JSON,
+        allowNull: true,
     }
 }, {
     tableName: 'stops',   // Name of the table

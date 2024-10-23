@@ -21,7 +21,7 @@ const isAuth = async (req: AuthenticatedRequest, res: Response, next: NextFuncti
     // Attach decoded token data to req.user (or req.auth)
     req.user = decoded;
     if (req.user.role === roles.DRIVER) {
-      const driverToken = await getValue(req?.user?.id)
+      const driverToken = await getValue(`${req?.user?.id}token`)
       if (token !== driverToken) {
         return res.status(401).json({ message: "Logged in using other device" })
       }
