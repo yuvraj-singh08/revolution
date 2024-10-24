@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { assignRouteService, createActiveRouteService, finishRouteService, deleteRouteService, deleteRoutesByDateService,  getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService } from "../services/route";
+import { assignRouteService, createActiveRouteService, finishRouteService, deleteRouteService, deleteRoutesByDateService, getActiveRoutesService, getAssignedRoutesService, getRouteService, leaveIncompleteRouteService, unAssignRouteService, adminFinishRouteService } from "../services/route";
 import { deleteStopsforRouteService, deleteStopsForDateService } from "../services/stops";
 import Logger from '../middleware/Logger'
 
@@ -9,26 +9,26 @@ import { checkPermissionService } from "../services/role";
 import HttpError from "../utils/httpError";
 const logger = new Logger();
 
-export const deleteDayData =  async (req: Request, res: Response) => {
-console.log(req.body.uploadDate)
-try {
-    const { uploadDate } = req.body;
-    const deletedRouteCount = await deleteRoutesByDateService(uploadDate);
-    if (deletedRouteCount.deletedCount != 0) {
-        const deletedStopsCount = await deleteStopsForDateService(uploadDate);
-        logger.logEvent('Route_ACTION', `Route Data Deleted for date ${uploadDate}`);
-        return res.send({ message: 'Route has been deleted for given Date', success: true, error: false });
+export const deleteDayData = async (req: Request, res: Response) => {
+    console.log(req.body.uploadDate)
+    try {
+        const { uploadDate } = req.body;
+        const deletedRouteCount = await deleteRoutesByDateService(uploadDate);
+        if (deletedRouteCount.deletedCount != 0) {
+            const deletedStopsCount = await deleteStopsForDateService(uploadDate);
+            logger.logEvent('Route_ACTION', `Route Data Deleted for date ${uploadDate}`);
+            return res.send({ message: 'Route has been deleted for given Date', success: true, error: false });
+        }
+        logger.logEvent('Route_ACTION', `Route Data Not Deleted for date ${uploadDate}, as it was already Assigned`);
+        return res.send({ message: 'Routes not deleted as they have already been assigned', success: false, error: true });
+
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({ message: `Error: ${error.message}`, error: true, success: false });
     }
-    logger.logEvent('Route_ACTION', `Route Data Not Deleted for date ${uploadDate}, as it was already Assigned`);
-    return res.send({ message: 'Routes not deleted as they have already been assigned', success: false, error: true });
-
-} catch (error: any) {
-    console.log(error);
-    return res.status(500).json({ message: `Error: ${error.message}`, error: true, success: false });
-}
 }
 
-export const deleteRoutes =  async (req: Request, res: Response) => {
+export const deleteRoutes = async (req: Request, res: Response) => {
     console.log(req.body.date)
     try {
         const { routeId } = req.body;
@@ -37,7 +37,7 @@ export const deleteRoutes =  async (req: Request, res: Response) => {
         }
         const deletedRouteCount = await deleteRouteService(routeId);
         const deletedStopsCount = await deleteStopsforRouteService(routeId);
-    
+
         if (deletedRouteCount === 0) {
             return res.status(404).json({ message: 'Route not found', success: false, error: true });
         }
@@ -47,7 +47,7 @@ export const deleteRoutes =  async (req: Request, res: Response) => {
         console.log(error);
         return res.status(500).json({ message: `Error: ${error.message}`, error: true, success: false });
     }
-    }
+}
 
 export const getRoutes = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -201,6 +201,29 @@ export const getActiveRoutes = async (req: AuthenticatedRequest, res: Response, 
         const activeRoutes = await getActiveRoutesService(driverId);
         res.status(200).json({ success: true, data: activeRoutes });
 
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const adminFinishRoute = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const routeId = req.body.routeId;
+        const role = req.user.role;
+        if (!(await checkPermissionService(role.id, resources.ROUTE, 'update'))) {
+            res.status(403).json({
+                success: false,
+                message: 'Insufficient permissions to make changes to route'
+            });
+            return;
+        }
+        const response = await adminFinishRouteService(routeId);
+        if (response) {
+            res.status(201).json({ success: true, message: "Marked Route as Finished" })
+        }
+        else {
+            res.status(400).json({ success: false, message: "Failed to mark Route as Finished" })
+        }
     } catch (error) {
         next(error);
     }
