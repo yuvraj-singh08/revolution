@@ -218,7 +218,12 @@ export const adminFinishRoute = async (req: AuthenticatedRequest, res: Response,
             return;
         }
         const response = await adminFinishRouteService(routeId);
-        res.status(201).json({ success: true, message: "Marked Route as Finished" })
+        if (response) {
+            res.status(201).json({ success: true, message: "Marked Route as Finished" })
+        }
+        else {
+            res.status(400).json({ success: false, message: "Failed to mark Route as Finished" })
+        }
     } catch (error) {
         next(error);
     }

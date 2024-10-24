@@ -380,13 +380,17 @@ export const finishRouteService = async (driverId: string, routeId: string) => {
 
 export const adminFinishRouteService = async (routeId: string) => {
     try {
-        Route.update({
+        const [response] = await Route.update({
             status: 'FINISHED',
         }, {
             where: {
                 id: routeId,
             }
         })
+        if(response){
+            return true
+        }
+        return false;
     } catch (error) {
         console.log(error);
         throw error;
