@@ -8,24 +8,32 @@ import * as fs from 'fs';
 
 dotenv.config();
 
-export const getLog = async (date: string, filterId?: string)=> {
-    const logFilePath = path.join(__dirname, 'logs', `${date}.json`);
 
-    fs.readFile(logFilePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading log file:', err);
-            return;
-        }
+
+export const getLog = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const log = await getLogData(req.body.Date);
+        res.send(log);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getLogData = async (date: string, filterId?: string) => {
+    const logFilePath = path.join(__dirname, '../middleware/logs', `${date}.json`);
+
+    try {
+        const data = await fs.promises.readFile(logFilePath, 'utf8');
         const logs = data.split('\n')
             .filter(line => line.trim())
             .map(line => JSON.parse(line));
-
         const filteredLogs = filterId ? logs.filter(log => log.id === filterId) : logs;
-        console.log(filteredLogs);
-    });
-}
-
-
+        return filteredLogs; // Return the filtered logs
+    } catch (err) {
+        console.error('Error reading log file:', err);
+        throw err; // Rethrow the error to be caught in the calling function
+    }
+};
 
 export const getReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
