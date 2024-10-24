@@ -4,6 +4,7 @@ import { CreateAdminProps, LoginAdminProps, UpdateAdminProps } from "../utils/ty
 import RoleManager from '../models/RoleManager.model';
 import { Roles } from '../models/Role.model.group';
 import jwt from 'jsonwebtoken';
+import HttpError from '../utils/httpError';
 
 export const createAdminService = async ({ email, password, name }: CreateAdminProps) => {
     try {
@@ -29,11 +30,11 @@ export const loginAdminService = async ({ email, password }: LoginAdminProps) =>
             where: { email },
         })
         if (!user) {
-            throw new Error("User does not exist")
+            throw new HttpError("User does not exist", 400)
         }
         const isPasswordMatch = await bcrypt.compare(password, user.get("password") as unknown as string);
         if (!isPasswordMatch) {
-            throw new Error("Invalid password")
+            throw new HttpError("Invalid password", 400)
         }
 
         const SECRET_KEY = process.env.SECRET_KEY || 'cleanclean';

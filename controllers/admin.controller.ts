@@ -31,10 +31,10 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
         }
         const user = await loginAdminService({ email, password });
         logger.logEvent('USER_ACTION', `Admin Login with email ${email}`);
-        res.status(201).json({ success: true, message: "LogIn Successful", ...user });
+        res.status(200).json({ success: true, message: "LogIn Successful", ...user });
     } catch (error: any) {
         console.error(error);
-        res.status(500).json({ success: false, error: error.message, message: "Failed to Login" });
+        next(error);
     }
 }
 
