@@ -378,6 +378,21 @@ export const finishRouteService = async (driverId: string, routeId: string) => {
     }
 }
 
+export const adminFinishRouteService = async (routeId: string) => {
+    try {
+        Route.update({
+            status: 'FINISHED',
+        }, {
+            where: {
+                id: routeId,
+            }
+        })
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 export const leaveIncompleteRouteService = async (driverId: string, routeId: string) => {
     try {
         let whereClause: any = {
