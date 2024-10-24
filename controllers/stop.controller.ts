@@ -190,7 +190,7 @@ export const addStop = async (req: AuthenticatedRequest, res: Response, next: Ne
             throw new HttpError("Missing required fields", 400);
         }
 
-        const newStop = await addStopService({ routeId, latitude, longitude, date, status, stopId, serveAddress, accountNumber })
+        const newStop = await addStopService(req.body)
         logger.logEvent('STOP_ACTION', `new Stop added with Route ID: ${routeId} , StopID ${stopId}`);
 
         res.status(201).json({ success: true, data: newStop })

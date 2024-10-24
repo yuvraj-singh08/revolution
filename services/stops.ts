@@ -357,27 +357,29 @@ export const getStopsService  = async (date: string | undefined, status:string |
     }
 } 
 
-export const addStopService = async({routeId, latitude, longitude, status, stopId, date}: AddStopParams) => {
+export const addStopService = async(data: any
+    
+) => {
 try {
     let route = await Route.findOne({
         where: {
-            routeId,
-            uploadDate: date
+            routeId: data.routeId,
+            uploadDate: data.date
         }
     })
 
     if(!route){
         route = await Route.create({
-            routeId,
-            uploadDate: date
+            routeId: data.routeId,
+            uploadDate: data.date
         })
     }
 
     const stop = await Stop.findOne({
         where:{
-            latitude,
-            longitude,
-            uploadDate: date,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            uploadDate: data.date,
         }
     })
 
@@ -386,12 +388,9 @@ try {
     }
 
     const newStop = await Stop.create({
+        ...data,
         routeId: route.get('id'),
-        latitude,
-        longitude,
-        status,
-        stopId,
-        uploadDate: date,
+        uploadDate: data.date,
     });
     return newStop;
 } catch (error: any) {
