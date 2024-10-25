@@ -274,7 +274,7 @@ export const unassignRoute = async (req: AuthenticatedRequest, res: Response, ne
             }
         }
 
-        const destroy = await unAssignRouteService(driverId, routeId);
+        const destroy = await unAssignRouteService(routeId);
         logger.logEvent('Route_ACTION', `Route id: ${routeId} ,  unassigned from driver Id: ${driverId}`);
 
         res.status(200).json({ success: true, data: destroy });

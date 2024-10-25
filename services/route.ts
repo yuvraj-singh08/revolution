@@ -422,12 +422,11 @@ export const leaveIncompleteRouteService = async (driverId: string, routeId: str
     }
 }
 
-export const unAssignRouteService = async (driverId: string, routeId: string) => {
+export const unAssignRouteService = async (routeId: string) => {
     try {
         const activeRoute = await ActiveRoutes.findOne({
             where: {
                 routeId,
-                driverId
             }
         })
 
@@ -437,7 +436,6 @@ export const unAssignRouteService = async (driverId: string, routeId: string) =>
 
         const destroy = await AssignedRoute.destroy({
             where: {
-                driverId,
                 routeId
             }
         })
