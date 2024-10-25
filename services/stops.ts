@@ -1,4 +1,4 @@
-import { officeCoordinate } from "../config/constants";
+import { officeCoordinate, stopStatus } from "../config/constants";
 import Route from "../models/Route.model";
 import Stop from "../models/Stop.model";
 import { readCsv } from "../utils/readCsv"

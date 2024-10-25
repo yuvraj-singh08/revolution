@@ -9,6 +9,7 @@ router.post('/uploadCsv', isAuth, upload.single('file'), stopController.createCs
 router.post('/bulkUpdate', isAuth, stopController.updateBulkStop);
 router.post('/update', isAuth, stopController.updateStop);
 router.get('/', isAuth, stopController.getStops);
+router.get('/exception', isAuth, stopController.getExceptions);
 router.post('/add', isAuth, stopController.addStop);
 router.post('/imgUpload', upload.single('image'), stopController.imgUpload);
 

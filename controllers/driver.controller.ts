@@ -256,7 +256,7 @@ export const createDriver = async (req: AuthenticatedRequest, res: Response, nex
 
 export const loginDriver = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email, password } = req.body;
+        const { email, phone, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({ error: "Missing required fields" });
         }

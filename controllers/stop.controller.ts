@@ -17,12 +17,12 @@ const s3Client = new S3Client({
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
-      }
-  });
-  
-  
+    }
+});
 
-  export const imgUpload = async (req: AuthenticatedRequest, res: Response) => {
+
+
+export const imgUpload = async (req: AuthenticatedRequest, res: Response) => {
     try {
         if (!req.file || !req.body.stop) {
             return res.status(400).json({ success: false, message: 'required paramenters not provided' });
@@ -44,18 +44,18 @@ const s3Client = new S3Client({
         const signedUrlExpireSeconds = 60 * 60 * 24
         const url = await getSignedUrl(s3Client, command, { expiresIn: signedUrlExpireSeconds });
         let s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFilename}`;
-        
-        let currentImgBulk = await getStopImagesbyIdService(req.body.stop)     
+
+        let currentImgBulk = await getStopImagesbyIdService(req.body.stop)
         try {
-            
+
             let currentImageUrl = currentImgBulk?.dataValues.imageUrl || '';
             let updatedImageUrl = currentImageUrl ? `${currentImageUrl},${s3Url}` : s3Url;
-            
+
             let reqBody = {
                 "id": req.body.stop,
                 "imageUrl": updatedImageUrl
             };
-           await updateStopService(reqBody);
+            await updateStopService(reqBody);
         } catch (error: any) {
             console.log(error);
             res.status(400).json({
@@ -66,7 +66,7 @@ const s3Client = new S3Client({
         }
         logger.logEvent('STOP_ACTION', `Stop with ID: ${req.body.stop} , Image added at ${s3Url}`);
 
-        return res.json({ 
+        return res.json({
             s3Url: s3Url
         });
     } catch (error) {
@@ -145,6 +145,26 @@ export const updateStop = async (req: AuthenticatedRequest, res: Response, next:
             message: 'Failed to update bulk stop',
             error: error.message
         })
+    }
+}
+
+export const getExceptions = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { startDate, endDate } = req.query;
+        if (startDate && typeof startDate !== 'string') {
+            throw new HttpError("Invalid date format", 400);
+        }
+        if (endDate && typeof endDate !== 'string') {
+            throw new HttpError("Invalid status format", 400);
+        }
+        const stops = await getStopsService(startDate, endDate);
+        res.status(200).json({
+            success: true,
+            data: stops,
+            message: 'Stops fetched successfully'
+        });
+    } catch (error) {
+        next(error);
     }
 }
 
