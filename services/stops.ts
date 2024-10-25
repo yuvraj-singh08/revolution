@@ -5,6 +5,7 @@ import { readCsv } from "../utils/readCsv"
 import csvParser from 'csv-parser';
 import { AddStopParams, StopStatusType } from "../utils/types";
 import HttpError from "../utils/httpError";
+import { Op, where } from 'sequelize';
 
 
 export const getStopImagesbyIdService  = async (id: string) => {
@@ -22,6 +23,8 @@ export const getStopImagesbyIdService  = async (id: string) => {
         throw new HttpError(error.message, 400);
     }
 } 
+
+
 
 export const deleteStopsForDateService = async (uploadDate: Date): Promise<{ message: string; deletedCount: number }> => {
     try {
@@ -337,6 +340,45 @@ export const updateStopService = async (data: any) => {
         throw error;
     }
 }
+
+export const getExceptionsService  = async (startDate: string, endDate: string): Promise<any | null> => {
+    try {
+        let whereClause:any =  {
+            markedAt: {
+                [Op.between]: [new Date(startDate), new Date(endDate)]
+            }
+        }
+        const stops = await Stop.findAll({
+            where:whereClause
+        })
+        return stops;
+    } catch (error: any) {
+        console.log(error);
+        throw new HttpError(error.message, 400);
+    }
+
+} 
+
+
+export const getAccNoService  = async (startDate: string, endDate: string, AccNo:string): Promise<any | null> => {
+    try {
+        let whereClause:any =  {
+            markedAt: {
+                [Op.between]: [new Date(startDate), new Date(endDate)]
+            },
+            accountNumber: AccNo
+        }
+        const stops = await Stop.findAll({
+            where:whereClause
+        })
+        return stops;
+    } catch (error: any) {
+        console.log(error);
+        throw new HttpError(error.message, 400);
+    }
+
+} 
+
 
 export const getStopsService  = async (date: string | undefined, status:string | undefined) => {
     try {

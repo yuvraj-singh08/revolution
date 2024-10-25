@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import { NextFunction, Response } from "express";
 import { getAllDriversReportService } from "../services/driver";
 import { getAllRouteService } from "../services/route";
+import {getExceptionsService, getAccNoService} from '../services/stops';
 import { AuthenticatedRequest } from "../middleware/auth";
 import * as path from 'path';
 import * as fs from 'fs';
@@ -41,6 +42,12 @@ export const getReport = async (req: AuthenticatedRequest, res: Response, next: 
             res.json(await getAllDriversReportService(req.body.from, req.body.to))
         } else if (req.body.for == 'routes') {
             res.json(await getAllRouteService(req.body.from, req.body.to))
+        }
+        else if (req.body.for == 'exceptions') {
+            res.json(await getExceptionsService(req.body.from, req.body.to))
+        }
+        else if (req.body.for == 'account') {
+            res.json(await getAccNoService(req.body.from, req.body.to, req.body.acc))
         }
         else {
             res.json({ error: "unknow report requested" })
