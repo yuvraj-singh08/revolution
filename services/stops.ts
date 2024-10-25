@@ -343,10 +343,11 @@ export const updateStopService = async (data: any) => {
 
 export const getExceptionsService  = async (startDate: string, endDate: string): Promise<any | null> => {
     try {
-        let whereClause:any =  {
-            markedAt: {
-                [Op.between]: [new Date(startDate), new Date(endDate)]
-            }
+        let whereClause:any = {
+            uploadDate: {
+                [Op.between]: [startDate, endDate],
+            },
+            status: stopStatus.exception
         }
         const stops = await Stop.findAll({
             where:whereClause

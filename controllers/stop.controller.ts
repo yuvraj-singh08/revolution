@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { checkPermissionService } from "../services/role";
 import { actions, resources } from "../config/constants";
-import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService, getStopImagesbyIdService } from "../services/stops";
+import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService, getStopImagesbyIdService, getExceptionService } from "../services/stops";
 import moment from "moment";
 import HttpError from "../utils/httpError";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -148,16 +148,19 @@ export const updateStop = async (req: AuthenticatedRequest, res: Response, next:
     }
 }
 
-export const getExceptions = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const getException = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { startDate, endDate } = req.query;
+        if (!startDate || !endDate) {
+            throw new HttpError("Start Date or End Date missing", 400);
+        }
         if (startDate && typeof startDate !== 'string') {
             throw new HttpError("Invalid date format", 400);
         }
         if (endDate && typeof endDate !== 'string') {
             throw new HttpError("Invalid status format", 400);
         }
-        const stops = await getStopsService(startDate, endDate);
+        const stops = await getExceptionService(startDate, endDate);
         res.status(200).json({
             success: true,
             data: stops,
