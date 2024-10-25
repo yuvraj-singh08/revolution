@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { checkPermissionService } from "../services/role";
 import { actions, resources } from "../config/constants";
-import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService, getStopImagesbyIdService, getExceptionService } from "../services/stops";
+import { addStopService, createCsvStopService, getStopsService, updateBulkStopService, updateStopService, getStopImagesbyIdService, getExceptionsService } from "../services/stops";
 import moment from "moment";
 import HttpError from "../utils/httpError";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -160,7 +160,7 @@ export const getException = async (req: AuthenticatedRequest, res: Response, nex
         if (endDate && typeof endDate !== 'string') {
             throw new HttpError("Invalid status format", 400);
         }
-        const stops = await getExceptionService(startDate, endDate);
+        const stops = await getExceptionsService(startDate, endDate);
         res.status(200).json({
             success: true,
             data: stops,
