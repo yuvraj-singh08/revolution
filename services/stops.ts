@@ -156,6 +156,7 @@ export const createCsvStopService = async (fileBuffer: any, date: string): Promi
                     containerId: data.CONTAINER1 || null,
                     oneTimePickup: !!data.WLIN3,
                     message: data['W-MSG1'] || null,
+                    stopped: data['W-LIT1'] === stopStatus.stopped,
                     faulty: false,
                 };
                 

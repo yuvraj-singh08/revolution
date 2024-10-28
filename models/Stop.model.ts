@@ -118,6 +118,10 @@ const Stop = sequelize.define('Stop', {
         type: DataTypes.STRING,
         defaultValue: "",  // Default value for notPickedUp is false
     },
+    stopped: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,  // Default value for stopped is false
+    },
     driverLocation: {
         type: DataTypes.JSON,
         allowNull: true,
