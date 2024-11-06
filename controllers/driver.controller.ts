@@ -20,6 +20,7 @@ import { createTransport } from 'nodemailer';
 import Driver from '../models/Driver.model';
 import fs from 'fs';
 import path from 'path';
+import { Op } from 'sequelize';
 
 const filePath = path.join(__dirname, '../config/notPickedUpList.txt');
 dotenv.config();
@@ -101,17 +102,20 @@ export const getAllActiveDrivers = async (req: AuthenticatedRequest, res: Respon
 
 export const driverPasswordResetRequest = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const email = req.body.email;
-        if (!email) {
+        const { email, phone } = req.body;
+        if (!email && !phone) {
             res.status(400).json({
                 error: true,
-                message: 'Email is required'
+                message: 'Email or phone is required'
             })
             return;
         }
         const driver = await Driver.findOne({
             where: {
-                email
+                [Op.or]: [
+                    { phone: phone || "" },
+                    { email: email || "" }
+                ]
             }
         })
         if (!driver) {
@@ -214,11 +218,14 @@ export const createDriver = async (req: AuthenticatedRequest, res: Response, nex
             })
             return;
         }
-        const { email, password, name } = req.body;
+        const { email, password, phone, name } = req.body;
         if (!email || !password || !name) {
             return res.status(400).json({ error: "Missing required fields" });
         }
-        const createdDriver = await createDriverService({ email, password, name });
+        if (phone && phone.length != 10) {
+            return res.status(400).json({ error: "Invalid phone number" });
+        }
+        const createdDriver = await createDriverService({ email, password, phone, name });
         // Send registration email
         const transporter = createTransport({
             service: 'gmail',
@@ -257,12 +264,12 @@ export const createDriver = async (req: AuthenticatedRequest, res: Response, nex
 export const loginDriver = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, phone, password } = req.body;
-        if (!email || !password) {
+        if ((!email && !phone) || !password) {
             return res.status(400).json({ error: "Missing required fields" });
         }
-        const user = await loginDriverService({ email, password });
+        const user = await loginDriverService({ email, phone, password });
         logger.logEvent('DRIVER_ACTION', `Driver logged in with email ${email}`);
-        res.status(201).json({ success: true, message: "LogIn Successful", ...user });
+        res.status(200).json({ success: true, message: "LogIn Successful", ...user });
     } catch (error: any) {
         console.error(error);
         res.status(500).json({ success: false, error: error.message, message: "Failed to Login" });

@@ -2,6 +2,7 @@ export interface CreateDriverProps {
     email: string,
     password: string,
     name: string,
+    phone: string,
 }
 
 export interface UpdateDriverStatusProps {
@@ -51,6 +52,7 @@ export interface LoginAdminProps {
 
 export interface LoginDriverProps {
     email: string,
+    phone: string,
     password: string,
 }
 

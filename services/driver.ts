@@ -108,13 +108,14 @@ export const setLocationService = async (driverID: string, Coords: string) => {
 }
 
 
-export const createDriverService = async ({ email, name, password }: CreateDriverProps) => {
+export const createDriverService = async ({ email, name, phone, password }: CreateDriverProps) => {
     try {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
         const newDriver = await Driver.create({
             email,
             name,
+            phone: phone || null,
             password: passwordHash,
         })
         if (!newDriver) {
@@ -146,10 +147,15 @@ export const updateDriverService = async (driverId: string, updateData: UpdateDr
 };
 
 
-export const loginDriverService = async ({ email, password }: LoginDriverProps) => {
+export const loginDriverService = async ({ email, phone, password }: LoginDriverProps) => {
     try {
         const user = await Driver.findOne({
-            where: { email },
+            where: {
+                [Op.or]: [
+                    { phone: phone || "" },
+                    { email: email || "" }
+                ]
+            },
         })
         if (!user) {
             throw new Error("Driver does not exist")
@@ -166,6 +172,7 @@ export const loginDriverService = async ({ email, password }: LoginDriverProps) 
             id: user.get("id"),
             name: user.get("name"),
             email: user.get("email"),
+            phone: user.get("phone"),
             role: roles.DRIVER
         }
         const token = jwt.sign(userSessionData, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
