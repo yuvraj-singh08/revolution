@@ -40,6 +40,7 @@ const Driver = sequelize.define('Driver', {
     },
     status: {
         type: DataTypes.JSON,
+        defaultValue:[]
     },
     active:{
         type: DataTypes.BOOLEAN,
